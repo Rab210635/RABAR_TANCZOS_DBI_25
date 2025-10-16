@@ -1,0 +1,156 @@
+@startuml
+
+entity Library <<Entity>> {
+    - id: Long
+    - name: String
+    - headquarters: Address
+    - books: CollectionList<BookInLibraries>
+}
+
+entity Branch <<Entity>> {
+    - id: Long
+    - address: Address
+    - copies: CollectionList<Copy>
+    - library: Library
+}
+
+class BookInLibraries <<ValueObject>> << (V,#339966) >> {
+    - book : Book
+    - borrowLengthDays : Integer
+}
+
+entity Book <<Entity>> {
+    - id: Long
+    - name: String
+    - release : Date
+    - availableOnline: Boolean
+    - wordCount: Integer
+    - genres: CollectionList<BookGenre>
+    - description: String
+    - authors: CollectionList<Author>
+}
+
+class Borrowing <<ValueObject>> << (V,#339966) >> {
+    - customer : Customer
+    - copy : Copy
+    - fromDate : Date
+    - extendedDays : Integer
+}
+
+class Copy <<ValueObject>> << (V,#339966) >> {
+    - id: Long
+    - publisher: Publisher
+    - type: BookType
+    - pageCount: Int
+    - book: Book
+}
+
+class Cart <<ValueObject>> << (V, #339966)  >> {
+    - customer: Customer
+    - books: CollectionList<Copy>
+    - subscriptions: CollectionList<LibrarySubscription>
+    - date: Date
+}
+
+entity Person <<Entity>> {
+    - id: Long
+    - firstName: String
+    - lastName: String
+    - address: Address
+    - email: String
+}
+
+entity Author <<Entity>> extends Person {
+    - penName: String
+}
+
+entity Customer <<Entity>> extends Person {
+    - username: String
+    - password: String
+    - subscriptions: CollectionList<Subscribing>
+}
+
+class Address <<ValueObject>> << (V, #339966)  >> {
+    - streetAndNumber: String
+    - city: String
+    - postalCode: Integer
+}
+
+class Review <<ValueObject>> << (V,#339966) >> {
+    - title: String
+    - rating: Int
+    - description: String
+    - customer: Customer
+    - book: Book
+    - branch: Branch
+    - publisher: Publisher
+}
+
+entity Publisher <<Entity>> {
+    - id: Long
+    - name: String
+    - address: Address
+}
+
+entity LibrarySubscription <<Entity>> {
+    - id: Long
+    - name: String
+    - description: String
+    - monthlyCost: Double
+    - library: Library
+}
+
+class Subscribing <<ValueObject>> << (V,#339966) >> {
+    - librarySubscription: LibrarySubscription
+    - mainBranch: Branch
+}
+
+enum BookType <<Enum>>  {
+    HARDCOVERS
+    PAPERBACK
+}
+
+enum BookGenre <<Enum>>  {
+    FANTASY
+    DRAMA
+    ROMANCE
+    ...
+}
+
+
+
+Customer <-- Address : located at >
+Customer *-- Subscribing: subscribes to >
+Customer <-- Cart: belongs to >
+Customer <-- Review: created by >
+Customer <-- Borrowing: borrowed >
+
+Publisher <-- Copy : from >
+Publisher <-- Address : located at >
+Publisher <-- Review : reviewed by >
+
+Branch <-- Address : located at >
+Branch <-- Review : to >
+Branch *-- Copy : contains ordered >
+Branch --> Subscribing: main <
+
+Book <-right- Copy : references <
+Book <-up- Review : to >
+Book *.. BookGenre : is >
+Book *-- Author : has >
+Book <-up- BookInLibraries : in >
+
+Library <-- Branch: belongs to >
+Library <-- Address : located at >
+Library <-- LibrarySubscription: offers >
+Library *-- BookInLibraries: contains >
+
+LibrarySubscription --* Cart: in <
+LibrarySubscription --> Subscribing: type <
+
+Copy --* Cart : in <
+Copy ..> BookType : embedded <
+Copy <-- Borrowing : borrowed >
+
+
+@enduml

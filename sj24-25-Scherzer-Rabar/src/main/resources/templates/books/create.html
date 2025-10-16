@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Create Book</title>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="mb-4">Create Book</h2>
+
+            <form th:action="@{/www/books/add}" th:object="${newBook}" method="post" novalidate>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input id="name" th:field="*{name}" class="form-control" placeholder="Book Name" />
+                    <div th:if="${#fields.hasErrors('name')}" class="text-danger" th:errors="*{name}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="releaseDate" class="form-label">Release Date</label>
+                    <input id="releaseDate" type="date" th:field="*{releaseDate}" class="form-control" />
+                    <div th:if="${#fields.hasErrors('releaseDate')}" class="text-danger" th:errors="*{releaseDate}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="wordCount" class="form-label">Word Count</label>
+                    <input id="wordCount" type="number" th:field="*{wordCount}" class="form-control" placeholder="Word Count" />
+                    <div th:if="${#fields.hasErrors('wordCount')}" class="text-danger" th:errors="*{wordCount}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" th:field="*{description}" class="form-control" placeholder="Description"></textarea>
+                    <div th:if="${#fields.hasErrors('description')}" class="text-danger" th:errors="*{description}"></div>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input id="availableOnline" type="checkbox" th:field="*{availableOnline}" class="form-check-input" />
+                    <label for="availableOnline" class="form-check-label">Available Online</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="genres" class="form-label">Genres</label>
+                    <select id="genres" th:field="*{genres}" multiple class="form-select">
+                        <option th:each="genre : ${T(spengergasse.at.sj2425scherzerrabar.domain.BookGenre).values()}"
+                                th:value="${genre}"
+                                th:text="${genre}"
+                                th:selected="*{genres != null} ? *{genres.contains(${genre})} : false">
+                        </option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('genres')}" class="text-danger" th:errors="*{genres}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="bookTypes" class="form-label">Types</label>
+                    <select id="bookTypes" th:field="*{bookTypes}" multiple class="form-select">
+
+                        <option th:each="type : ${T(spengergasse.at.sj2425scherzerrabar.domain.BookType).values()}"
+                                th:value="${type}"
+                                th:text="${type}"
+                                th:selected="*{bookTypes != null} ? *{bookTypes.contains(${type})} : false">
+                        </option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('bookTypes')}" class="text-danger" th:errors="*{bookTypes}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="authors" class="form-label">Authors</label>
+                    <select id="authors" th:field="*{authors}" multiple class="form-select">
+                        <option th:each="author : ${existingAuthors}"
+                                th:value="${author.penname}"
+                                th:text="${author.penname}"
+                                th:selected="*{authors != null} ? *{authors.contains(${author.penname})} : false">
+                        </option>
+
+                    </select>
+                    <div th:if="${#fields.hasErrors('authors')}" class="text-danger" th:errors="*{authors}"></div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/www/books}" class="btn btn-secondary">Back</a>
+                    <button type="submit" class="btn btn-primary">Create Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="UTF-8">
+  <title>Authors</title>
+  <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}"/>
+  <link rel="stylesheet" th:href="@{/css/layout.css}" />
+</head>
+<body>
+<header class="bg-dark text-white p-3 mb-3">
+  <div class="container">
+    <h1><a th:href="@{/www}" class="text-white text-decoration-none">BookNow</a></h1>
+    <nav>
+      <a th:href="@{/www/authors}" class="text-white me-3">Authors</a>
+      <a th:href="@{/www/books}" class="text-white me-3">Books</a>
+      <button id="darkModeToggle" class="btn btn-sm">
+        🌙
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="container" layout:fragment="content">
+</main>
+
+
+<section layout:fragment="scripts">
+</section>
+
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+<script>
+  const btn = document.getElementById('darkModeToggle');
+
+  if(localStorage.getItem('darkMode') === 'enabled'){
+    document.body.classList.add('dark-mode');
+  }
+
+  btn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    if(document.body.classList.contains('dark-mode')){
+      localStorage.setItem('darkMode', 'enabled');
+      btn.textContent = '☀️';  // Sonne-Icon wenn dark mode an
+    } else {
+      localStorage.setItem('darkMode', 'disabled');
+      btn.textContent = '🌙';  // Mond-Icon wenn dark mode aus
+    }
+  });
+
+  if(document.body.classList.contains('dark-mode')){
+    btn.textContent = '☀️';
+  } else {
+    btn.textContent = '🌙';
+  }
+</script>
+
+</body>
+<footer class="bg-light text-center p-3 footer">
+  <div >© 2025 Wunderful</div>
+</footer>
+</html>

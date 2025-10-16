@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${book.name}">Book Details</title>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4" th:text="${book.name}">Book Name</h2>
+
+            <dl class="row">
+                <dt class="col-sm-3">Release Date:</dt>
+                <dd class="col-sm-9" th:text="${book.releaseDate}">Release Date Here</dd>
+
+                <dt class="col-sm-3">Available Online:</dt>
+                <dd class="col-sm-9" th:text="${book.availableOnline} ? 'Yes' : 'No'">Yes/No</dd>
+
+                <dt class="col-sm-3">Word Count:</dt>
+                <dd class="col-sm-9" th:text="${book.wordCount}">Word Count Here</dd>
+
+                <dt class="col-sm-3">Description:</dt>
+                <dd class="col-sm-9" th:text="${book.description}">Description Here</dd>
+
+                <dt class="col-sm-3">Genres:</dt>
+                <dd class="col-sm-9" th:text="${#strings.listJoin(book.genres, ', ')}">Genres Here</dd>
+
+                <dt class="col-sm-3">Types:</dt>
+                <dd class="col-sm-9" th:text="${#strings.listJoin(book.types(), ', ')}">Types Here</dd>
+
+                <dt class="col-sm-3">Authors:</dt>
+                <dd class="col-sm-9" th:text="${#strings.listJoin(book.authorPennames, ', ')}">Authors Here</dd>
+            </dl>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a th:href="@{/www/books}" class="btn btn-secondary">Back</a>
+                <a th:href="@{'/www/books/edit'(apiKey=${book.apiKey})}" class="btn btn-primary">Edit</a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

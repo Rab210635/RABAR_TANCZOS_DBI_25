@@ -1,0 +1,18 @@
+= Versioning
+
+== Semantic versioning
+
+1.2.3.4
+
+1::
+Major version - breaking changes allowed, possible refractioring
+
+2::
+Minor version - breaking changes possible, extensive re-test
+
+3::
+Patch vesion - no breaking changes, should be a drop-in replacement
+
+4::
+Micro version - not even think about it - often build-#
+

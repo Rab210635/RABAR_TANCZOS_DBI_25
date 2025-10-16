@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+</head>
+<body>
+<div class="content"></div>
+<h1>Hello Großer</h1>
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">ApiKey</th>
+        <th scope="col">Addresses</th>
+        <th scope="col">Firstname</th>
+        <th scope="col">Lastname</th>
+        <th scope="col">Email</th>
+        <th scope="col"><a href="#" th:href="@{/customer/add}" th:text="Add">Add</a></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(customers)}">
+        <td colspan="11" th:text="No Customers Available" >No Data Available</td>
+    </tr>
+    <tr th:each="customers, customerStatus:${customers}" th:object="${customers}">
+        <th scope="row"><a href="#" th:href="@{/customers/show/{id}(id=*{apiKey})}" th:text="${customerStatus.index}" >1</a>
+        </th>
+        <td th:text="*{apiKey}">apiKey</td>
+        <td th:text="*{addresses}">Address1, Address2</td>
+        <td th:text="*{firstName}">Firstname</td>
+        <td th:text="*{lastName}">Lastname</td>
+        <td th:text="*{emailAddress}">Email</td>
+        <th scope="row">
+            <a href="#" th:href="@{/customer/edit/(key=*{apiKey})}" th:text="Edit">Edit</a>
+            <a href="#" th:href="@{/customer/delete/(key=*{apiKey})}" th:text="Delete">Delete</a>
+        </th>
+    </tr>
+    </tbody>
+</table>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+</body>
+</html>

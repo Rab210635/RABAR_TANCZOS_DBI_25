@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Home</title>
+</head>
+<body>
+<section layout:fragment="content">
+    <h1 th:text="'Welcome ' + ${principal}"></h1>
+    <h5>This is the WebApi for Booknow, including various CRUD functions for Books and Authors!</h5>
+</section>
+
+</body>
+</html>

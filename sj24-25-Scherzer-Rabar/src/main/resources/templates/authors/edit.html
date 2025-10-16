@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>Authors</title>
+
+</head>
+<body>
+<section layout:fragment="content">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title mb-4">Edit Author</h2>
+
+      <form th:action="@{/www/authors/edit/{apiKey}(apiKey=${apiKey})}" th:object="${form}" method="post" novalidate>
+        <div class="mb-3">
+          <label for="penname" class="form-label">Penname</label>
+          <input id="penname" th:field="*{penname}" class="form-control" placeholder="Penname" />
+          <div th:if="${#fields.hasErrors('penname')}" class="text-danger" th:errors="*{penname}"></div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="firstname" class="form-label">Firstname</label>
+            <input id="firstname" th:field="*{firstname}" class="form-control" placeholder="Firstname here" />
+            <div th:if="${#fields.hasErrors('firstname')}" class="text-danger" th:errors="*{firstname}"></div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="lastname" class="form-label">Lastname</label>
+            <input id="lastname" th:field="*{lastname}" class="form-control" placeholder="Lastname here" />
+            <div th:if="${#fields.hasErrors('lastname')}" class="text-danger" th:errors="*{lastname}"></div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="emailAddress" class="form-label">E-Mail</label>
+          <input id="emailAddress" th:field="*{emailAddress}" class="form-control" placeholder="E-Mail here" />
+          <div th:if="${#fields.hasErrors('emailAddress')}" class="text-danger" th:errors="*{emailAddress}"></div>
+        </div>
+
+        <h5 class="mt-4">Addresses</h5>
+        <div id="addresses">
+          <div class="address-group mb-3 border rounded p-3 " th:each="addr, iterStat : *{streetAndNumber}">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-5">
+                <label class="form-label">Street and Nr.</label>
+                <input th:field="*{streetAndNumber[__${iterStat.index}__]}" class="form-control" placeholder="Straße und Nr." />
+                <div th:if="${#fields.hasErrors('streetAndNumber[' + iterStat.index + ']')}" class="text-danger"
+                     th:errors="*{streetAndNumber[__${iterStat.index}__]}"></div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">City</label>
+                <input th:field="*{city[__${iterStat.index}__]}" class="form-control" placeholder="Stadt" />
+                <div th:if="${#fields.hasErrors('city[' + iterStat.index + ']')}" class="text-danger"
+                     th:errors="*{city[__${iterStat.index}__]}"></div>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">ZIP-Code</label>
+                <input th:field="*{plz[__${iterStat.index}__]}" class="form-control" placeholder="PLZ" />
+                <div th:if="${#fields.hasErrors('plz[' + iterStat.index + ']')}" class="text-danger"
+                     th:errors="*{plz[__${iterStat.index}__]}"></div>
+              </div>
+              <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-outline-danger" onclick="removeAddress(this)">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mb-4">
+          <button type="button" class="btn btn-outline-primary" onclick="addAddress()">+ Add Address</button>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <a th:href="@{/www/authors}" class="btn btn-secondary">Back</a>
+          <button type="submit" class="btn btn-success">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+<section layout:fragment="scripts">
+  <script>
+  function addAddress() {
+    const addresses = document.getElementById("addresses");
+    const firstAddress = addresses.querySelector(".address-group");
+    const newAddress = firstAddress.cloneNode(true);
+
+    newAddress.querySelectorAll("input").forEach(input => {
+      input.value = "";
+    });
+
+    const index = addresses.querySelectorAll(".address-group").length;
+
+    newAddress.querySelectorAll("input").forEach(input => {
+      const name = input.getAttribute("name");
+      if (name) {
+        const newName = name.replace(/\[\d+\]/, `[${index}]`);
+        input.setAttribute("name", newName);
+        input.setAttribute("id", newName);
+      }
+    });
+
+    addresses.appendChild(newAddress);
+  }
+
+  function removeAddress(button) {
+    const group = button.closest(".address-group");
+    const addresses = document.getElementById("addresses");
+    if (addresses.querySelectorAll(".address-group").length > 1) {
+      group.remove();
+    }
+  }
+</script>
+</section>
+
+</body>
+</html>

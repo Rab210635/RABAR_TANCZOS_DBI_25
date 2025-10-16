@@ -1,0 +1,12 @@
+ALTER TABLE author ADD COLUMN author_api_key VARCHAR(60);
+ALTER TABLE book ADD COLUMN book_api_key VARCHAR(60);
+ALTER TABLE borrowing ADD COLUMN borrowing_api_key VARCHAR(60);
+ALTER TABLE branch ADD COLUMN branch_api_key VARCHAR(60);
+ALTER TABLE buyable_book ADD COLUMN buyableBook_api_key VARCHAR(60);
+ALTER TABLE copy ADD COLUMN copy_api_key VARCHAR(60);
+ALTER TABLE customer ADD COLUMN customer_api_key VARCHAR(60);
+ALTER TABLE library ADD COLUMN library_api_key VARCHAR(60);
+ALTER TABLE libraryorder ADD COLUMN libraryOrder_api_key VARCHAR(60);
+ALTER TABLE librarysubscription ADD COLUMN librarySubscription_api_key VARCHAR(60);
+ALTER TABLE publisher ADD COLUMN publisher_api_key VARCHAR(60);
+ALTER TABLE review ADD COLUMN review_api_key VARCHAR(60);

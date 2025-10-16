@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>Autor-Details</title>
+</head>
+<body>
+<section layout:fragment="content">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title mb-4">Autor-Details</h2>
+
+      <dl class="row">
+        <dt class="col-sm-3">Penname:</dt>
+        <dd class="col-sm-9" th:text="${author.penname}">Penname here</dd>
+
+        <dt class="col-sm-3">Firstname:</dt>
+        <dd class="col-sm-9" th:text="${author.firstname}">Firstname here</dd>
+
+        <dt class="col-sm-3">Lastname:</dt>
+        <dd class="col-sm-9" th:text="${author.lastname}">Lastname here</dd>
+
+        <dt class="col-sm-3">E-Mail:</dt>
+        <dd class="col-sm-9" th:text="${author.emailAddress}">E-Mail here</dd>
+
+        <dt class="col-sm-3">Adressen:</dt>
+        <dd class="col-sm-9">
+          <p>Addresses: <span th:each="addr : *{author.address()}" th:text="${addr} + ' '"></span></p>
+
+        </dd>
+      </dl>
+
+      <div class="d-flex justify-content-between mt-4">
+        <a th:href="@{/www/authors}" class="btn btn-secondary">Back To All Authors</a>
+        <a th:href="@{/www/authors/edit/{apiKey}(apiKey=${author.apiKey})}" class="btn btn-primary">Edit</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script th:src="@{/webjars/bootstrap/5.3.3/dist/css/bootstrap.min.css}"></script>
+
+<script th:src="@{/webjars/bootstrap/5.3.3/dist/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/webjars/htmx.org/2.0.4/dist/htmx.min.js}"></script>
+</body>
+</html>
