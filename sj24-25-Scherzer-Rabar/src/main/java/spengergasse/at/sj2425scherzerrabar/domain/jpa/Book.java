@@ -17,8 +17,12 @@ import java.util.List;
 @Entity
 @Table(name = "book")
 public class Book {
+
+
+
     @EmbeddedId
     private BookId bookId;
+
     @Embedded
     @AttributeOverride(name = "apiKey", column = @Column(name = "book_api_key"))
     private ApiKey bookApiKey;
@@ -40,7 +44,6 @@ public class Book {
     @Column(name = "genre_code", columnDefinition = BookGenreConverter.COLUMN_DEFINITION)
     private List<BookGenre> genres;
     private String description;
-
     @ManyToMany(cascade = CascadeType.PERSIST
     )
     @JoinTable(name = "authors_of_book", joinColumns = @JoinColumn(name = "book_id",
@@ -67,7 +70,7 @@ public class Book {
     }
 
 
-    public void addAuthor(Author a){
+    public void addAuthor(Author a) {
         this.authors.add(a);
     }
 
@@ -139,13 +142,15 @@ public class Book {
         return bookApiKey;
     }
 
-
-
-
+    public BookId getBookId() {
+        return bookId;
+    }
 
     @SuppressWarnings("JpaObjectClassSignatureInspection")
     @Embeddable
-    public record BookId (@GeneratedValue @NotNull Long id){}
-    
+    public record BookId(@GeneratedValue @NotNull Long id) {
+
+
+    }
 
 }
