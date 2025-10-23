@@ -11,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import spengergasse.at.sj2425scherzerrabar.FixturesFactory;
 import spengergasse.at.sj2425scherzerrabar.commands.AuthorCommand;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
 import spengergasse.at.sj2425scherzerrabar.dtos.AuthorDto;
 import spengergasse.at.sj2425scherzerrabar.persistence.AuthorRepository;
 

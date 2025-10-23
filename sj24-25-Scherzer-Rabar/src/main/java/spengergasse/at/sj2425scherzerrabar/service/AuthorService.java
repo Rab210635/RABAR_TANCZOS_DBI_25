@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import spengergasse.at.sj2425scherzerrabar.commands.AuthorCommand;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
 import spengergasse.at.sj2425scherzerrabar.dtos.AuthorDto;
 import spengergasse.at.sj2425scherzerrabar.persistence.AuthorRepository;
 import spengergasse.at.sj2425scherzerrabar.presentation.RestController.LoggingController;

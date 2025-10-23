@@ -1,9 +1,12 @@
-package spengergasse.at.sj2425scherzerrabar.domain;
+package spengergasse.at.sj2425scherzerrabar.domain.jpa;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import spengergasse.at.sj2425scherzerrabar.domain.ApiKey;
+import spengergasse.at.sj2425scherzerrabar.domain.BookGenre;
+import spengergasse.at.sj2425scherzerrabar.domain.BookType;
 import spengergasse.at.sj2425scherzerrabar.foundation.ApiKeyFactory;
 import spengergasse.at.sj2425scherzerrabar.persistence.converter.BookGenreConverter;
 import spengergasse.at.sj2425scherzerrabar.persistence.converter.BookTypeConverter;

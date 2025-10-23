@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import spengergasse.at.sj2425scherzerrabar.commands.LibraryCommand;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
 import spengergasse.at.sj2425scherzerrabar.dtos.LibraryDto;
 import spengergasse.at.sj2425scherzerrabar.persistence.BookRepository;
 import spengergasse.at.sj2425scherzerrabar.persistence.LibraryRepository;

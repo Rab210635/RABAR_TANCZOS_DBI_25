@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import spengergasse.at.sj2425scherzerrabar.FixturesFactory;
 import spengergasse.at.sj2425scherzerrabar.TestcontainersConfiguration;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
 
 import java.time.LocalDate;
 import java.util.List;

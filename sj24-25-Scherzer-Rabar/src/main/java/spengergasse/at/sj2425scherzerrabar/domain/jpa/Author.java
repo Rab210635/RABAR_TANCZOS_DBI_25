@@ -1,6 +1,9 @@
-package spengergasse.at.sj2425scherzerrabar.domain;
+package spengergasse.at.sj2425scherzerrabar.domain.jpa;
 
 import jakarta.persistence.*;
+import spengergasse.at.sj2425scherzerrabar.domain.ApiKey;
+import spengergasse.at.sj2425scherzerrabar.domain.EmailAddress;
+import spengergasse.at.sj2425scherzerrabar.domain.Person;
 import spengergasse.at.sj2425scherzerrabar.foundation.ApiKeyFactory;
 
 import java.util.List;

@@ -2,21 +2,17 @@ package spengergasse.at.sj2425scherzerrabar.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import spengergasse.at.sj2425scherzerrabar.commands.BookCommand;
 import spengergasse.at.sj2425scherzerrabar.commands.BookCommand2;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
 import spengergasse.at.sj2425scherzerrabar.dtos.BookDto;
 import spengergasse.at.sj2425scherzerrabar.dtos.BookDto2;
 import spengergasse.at.sj2425scherzerrabar.persistence.AuthorRepository;
 import spengergasse.at.sj2425scherzerrabar.persistence.BookRepository;
-import spengergasse.at.sj2425scherzerrabar.presentation.RestController.LoggingController;
-import spengergasse.at.sj2425scherzerrabar.presentation.www.authors.CreateAuthorForm;
-import spengergasse.at.sj2425scherzerrabar.presentation.www.books.CreateBookForm;
 import spengergasse.at.sj2425scherzerrabar.presentation.RestController.LoggingController;
 
 import java.util.List;

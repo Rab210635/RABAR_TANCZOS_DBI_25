@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
 import spengergasse.at.sj2425scherzerrabar.persistence.converter.BookTypeConverter;
 
 @MappedSuperclass

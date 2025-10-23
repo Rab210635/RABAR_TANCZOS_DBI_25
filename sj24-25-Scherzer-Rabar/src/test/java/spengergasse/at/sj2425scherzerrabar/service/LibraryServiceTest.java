@@ -12,6 +12,7 @@ import spengergasse.at.sj2425scherzerrabar.FixturesFactory;
 import spengergasse.at.sj2425scherzerrabar.commands.BookInLibrariesCommand;
 import spengergasse.at.sj2425scherzerrabar.commands.LibraryCommand;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
 import spengergasse.at.sj2425scherzerrabar.dtos.BookInLibrariesDto;
 import spengergasse.at.sj2425scherzerrabar.dtos.LibraryDto;
 import spengergasse.at.sj2425scherzerrabar.persistence.BookRepository;

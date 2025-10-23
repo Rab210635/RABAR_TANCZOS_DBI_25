@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import spengergasse.at.sj2425scherzerrabar.FixturesFactory;
 import spengergasse.at.sj2425scherzerrabar.commands.CustomerCommand;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
 import spengergasse.at.sj2425scherzerrabar.dtos.CustomerDto;
 import spengergasse.at.sj2425scherzerrabar.persistence.CustomerRepository;
 

@@ -10,8 +10,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import spengergasse.at.sj2425scherzerrabar.FixturesFactory;
 import spengergasse.at.sj2425scherzerrabar.TestcontainersConfiguration;
-import spengergasse.at.sj2425scherzerrabar.domain.Address;
-import spengergasse.at.sj2425scherzerrabar.domain.Author;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.junit.jupiter.api.Assertions.*;

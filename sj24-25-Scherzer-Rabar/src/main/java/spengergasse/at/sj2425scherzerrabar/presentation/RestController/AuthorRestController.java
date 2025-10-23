@@ -12,7 +12,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spengergasse.at.sj2425scherzerrabar.commands.AuthorCommand;
-import spengergasse.at.sj2425scherzerrabar.domain.Author;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
 import spengergasse.at.sj2425scherzerrabar.dtos.AuthorDto;
 import spengergasse.at.sj2425scherzerrabar.service.AuthorService;
 

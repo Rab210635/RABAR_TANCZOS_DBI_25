@@ -1,7 +1,8 @@
 package spengergasse.at.sj2425scherzerrabar.dtos;
 
 
-import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
 
 
 import java.util.List;

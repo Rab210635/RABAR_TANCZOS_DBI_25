@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import spengergasse.at.sj2425scherzerrabar.FixturesFactory;
 import spengergasse.at.sj2425scherzerrabar.commands.BuyableBookCommand;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
 import spengergasse.at.sj2425scherzerrabar.dtos.BookDto;
 import spengergasse.at.sj2425scherzerrabar.dtos.BuyableBookDto;
 import spengergasse.at.sj2425scherzerrabar.dtos.PublisherDto;

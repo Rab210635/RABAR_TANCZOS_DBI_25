@@ -10,16 +10,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import spengergasse.at.sj2425scherzerrabar.FixturesFactory;
-import spengergasse.at.sj2425scherzerrabar.commands.BookCommand;
-import spengergasse.at.sj2425scherzerrabar.domain.Author;
-import spengergasse.at.sj2425scherzerrabar.domain.Book;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
 import spengergasse.at.sj2425scherzerrabar.dtos.BookDto;
-import spengergasse.at.sj2425scherzerrabar.service.AuthorService;
 import spengergasse.at.sj2425scherzerrabar.service.BookService;
 
 import java.util.List;

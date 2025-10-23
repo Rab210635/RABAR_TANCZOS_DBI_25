@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import spengergasse.at.sj2425scherzerrabar.domain.ApiKey;
-import spengergasse.at.sj2425scherzerrabar.domain.Author;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
 import spengergasse.at.sj2425scherzerrabar.dtos.AuthorDto;
 
 import java.util.List;

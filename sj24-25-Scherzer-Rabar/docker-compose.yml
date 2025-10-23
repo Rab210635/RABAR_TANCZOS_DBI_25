@@ -11,6 +11,19 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "35432:5432"
+  mongodb:
+    image: mongo:7
+    container_name: scherzerrabar-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: janaron
+      MONGO_INITDB_ROOT_PASSWORD: aaronjaan
+      MONGO_INITDB_DATABASE: scherzerrabardb
+    volumes:
+      - mongo-data:/data/db
+
 
 volumes:
   pgdata:
+  mongodata:

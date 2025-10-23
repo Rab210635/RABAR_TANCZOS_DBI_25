@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import spengergasse.at.sj2425scherzerrabar.FixturesFactory;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
 
 import java.util.stream.Stream;
 

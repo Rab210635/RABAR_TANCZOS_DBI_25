@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import spengergasse.at.sj2425scherzerrabar.commands.BranchCommand;
-import spengergasse.at.sj2425scherzerrabar.domain.Address;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
 import spengergasse.at.sj2425scherzerrabar.domain.ApiKey;
 import spengergasse.at.sj2425scherzerrabar.domain.Branch;
 import spengergasse.at.sj2425scherzerrabar.dtos.BranchDto;

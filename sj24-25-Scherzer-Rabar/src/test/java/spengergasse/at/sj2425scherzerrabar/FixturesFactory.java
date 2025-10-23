@@ -1,6 +1,9 @@
 package spengergasse.at.sj2425scherzerrabar;
 
 import spengergasse.at.sj2425scherzerrabar.domain.*;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
 
 import java.time.LocalDate;
 import java.util.List;

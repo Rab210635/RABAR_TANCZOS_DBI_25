@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import spengergasse.at.sj2425scherzerrabar.commands.PublisherCommand;
-import spengergasse.at.sj2425scherzerrabar.domain.Address;
+import spengergasse.at.sj2425scherzerrabar.domain.jpa.Address;
 import spengergasse.at.sj2425scherzerrabar.domain.ApiKey;
 import spengergasse.at.sj2425scherzerrabar.domain.Publisher;
 import spengergasse.at.sj2425scherzerrabar.dtos.PublisherDto;

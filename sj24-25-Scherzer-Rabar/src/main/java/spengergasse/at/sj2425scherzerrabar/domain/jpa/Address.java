@@ -1,4 +1,4 @@
-package spengergasse.at.sj2425scherzerrabar.domain;
+package spengergasse.at.sj2425scherzerrabar.domain.jpa;
 
 import jakarta.persistence.Embeddable;
 
