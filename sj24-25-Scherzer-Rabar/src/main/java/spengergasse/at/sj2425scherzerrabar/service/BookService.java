@@ -9,192 +9,259 @@ import spengergasse.at.sj2425scherzerrabar.commands.BookCommand2;
 import spengergasse.at.sj2425scherzerrabar.domain.*;
 import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
 import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
+import spengergasse.at.sj2425scherzerrabar.domain.mongo.BookDocument;
 import spengergasse.at.sj2425scherzerrabar.dtos.BookDto;
 import spengergasse.at.sj2425scherzerrabar.dtos.BookDto2;
+import spengergasse.at.sj2425scherzerrabar.mapper.BookMapper;
 import spengergasse.at.sj2425scherzerrabar.persistence.AuthorRepository;
+import spengergasse.at.sj2425scherzerrabar.persistence.BookMongoRepository;
 import spengergasse.at.sj2425scherzerrabar.persistence.BookRepository;
 import spengergasse.at.sj2425scherzerrabar.presentation.RestController.LoggingController;
 
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 @Transactional(readOnly = true)
 public class BookService {
+
     private final BookRepository bookRepository;
+    private final BookMongoRepository mongoRepository;
     private final AuthorRepository authorRepository;
+    private final BookMapper mapper;
     Logger logger = LoggerFactory.getLogger(LoggingController.class);
 
-    public BookService(BookRepository bookRepository, AuthorRepository authorRepository) {
+    public BookService(BookRepository bookRepository,
+                       BookMongoRepository mongoRepository,
+                       AuthorRepository authorRepository,
+                       BookMapper mapper) {
         this.bookRepository = bookRepository;
+        this.mongoRepository = mongoRepository;
         this.authorRepository = authorRepository;
+        this.mapper = mapper;
     }
 
     @Transactional
     public BookDto createBook(BookCommand command) {
         logger.debug("entered createBook");
         List<Author> authors = command.authorIds().stream()
-                    .map(ApiKey::new)
-                    .map(authorRepository::findAuthorByAuthorApiKey)
-                    .flatMap(Optional::stream)
-                    .toList();
+                .map(ApiKey::new)
+                .map(authorRepository::findAuthorByAuthorApiKey)
+                .flatMap(Optional::stream)
+                .toList();
+        if (authors.isEmpty()) throw BookServiceException.noAuthors();
 
-        if (authors.isEmpty()) {
-            throw BookServiceException.noAuthors();
-        }
         Book book = new Book(
                 command.name(), command.releaseDate(), command.availableOnline(), command.wordCount(),
-                command.genre().stream().map(BookGenre::valueOf).toList()
-                , authors, command.types().stream().map(BookType::valueOf).toList(), command.description()
+                command.genre().stream().map(BookGenre::valueOf).toList(),
+                authors, command.types().stream().map(BookType::valueOf).toList(),
+                command.description()
         );
-        return BookDto.bookDtoFromBook( bookRepository.save(book));
+
+        Book savedBook = bookRepository.save(book);
+
+        try {
+            BookDocument doc = mapper.toMongoDocument(savedBook);
+            mongoRepository.save(doc);
+            logger.debug("Book also saved to MongoDB: {}", savedBook.getBookApiKey().apiKey());
+        } catch (Exception e) {
+            logger.error("Failed to save book to MongoDB", e);
+        }
+
+        return BookDto.bookDtoFromBook(savedBook);
     }
 
     @Transactional
     public BookDto createBook2(BookCommand2 command) {
-        List<Author>  authors = command.authorPennames().stream()
-                    .map(authorRepository::findAuthorsByPenname)
-                    .flatMap(Optional::stream)
-                    .toList();
+        logger.debug("entered createBook2");
+        List<Author> authors = command.authorPennames().stream()
+                .map(authorRepository::findAuthorsByPenname)
+                .flatMap(Optional::stream)
+                .toList();
+        if (authors.isEmpty()) throw BookServiceException.noAuthors();
 
-        if (authors.isEmpty()) {
-            throw BookServiceException.noAuthors();
-        }
         Book book = new Book(
                 command.name(), command.releaseDate(), command.availableOnline(), command.wordCount(),
-                command.genre().stream().map(BookGenre::valueOf).toList()
-                , authors, command.types().stream().map(BookType::valueOf).toList(), command.description()
+                command.genre().stream().map(BookGenre::valueOf).toList(),
+                authors, command.types().stream().map(BookType::valueOf).toList(),
+                command.description()
         );
-        return BookDto.bookDtoFromBook(bookRepository.save(book));
+
+        Book savedBook = bookRepository.save(book);
+
+        try {
+            BookDocument doc = mapper.toMongoDocument(savedBook);
+            mongoRepository.save(doc);
+            logger.debug("Book also saved to MongoDB: {}", savedBook.getBookApiKey().apiKey());
+        } catch (Exception e) {
+            logger.error("Failed to save book to MongoDB", e);
+        }
+
+        return BookDto.bookDtoFromBook(savedBook);
     }
 
-    /*
     @Transactional
-    public Book createBook(CreateBookForm bookForm, @Valid CreateAuthorForm authorForm) {
-        Author author = (authorForm.getOwnerType().isExisting()) ? authorRepository.findByA
-
-        Book newBook = new Book("")
-    }
-
-     */
-
-    @Transactional
-    public void deleteBook(String bookApiKey) {
+    public void deleteBook(String apiKey) {
         logger.debug("entered deleteBook");
-        Book book = bookRepository.findBookByBookApiKey(new ApiKey(bookApiKey))
-                .orElseThrow(()-> BookServiceException.noBookForApiKey(bookApiKey));
+        Book book = bookRepository.findBookByBookApiKey(new ApiKey(apiKey))
+                .orElseThrow(() -> BookServiceException.noBookForApiKey(apiKey));
         bookRepository.delete(book);
-    }
 
+        try {
+            mongoRepository.findByApiKey(apiKey)
+                    .ifPresent(doc -> mongoRepository.deleteById(doc.getId()));
+            logger.debug("Book also deleted from MongoDB: {}", apiKey);
+        } catch (Exception e) {
+            logger.error("Failed to delete book from MongoDB", e);
+        }
+    }
 
     @Transactional
     public BookDto updateBook(BookCommand command) {
         logger.debug("entered updateBook");
-       Book book = bookRepository.findBookByBookApiKey(new ApiKey(command.apiKey())).map((Book b)->{
-            List<Author> authors = command.authorIds().stream()
-                    .map(ApiKey::new)
-                    .map(authorRepository::findAuthorByAuthorApiKey)
-                    .flatMap(Optional::stream)
-                    .toList();
-            if(authors.isEmpty()){
-                throw BookServiceException.noAuthors();
-            }
-            if(!b.getName().equals(command.name()))
-                b.setName(command.name());
-            if(b.getAvailableOnline() != command.availableOnline()) {
-                b.setAvailableOnline(command.availableOnline());
 
-            }
-            if(!b.getDescription().equals(command.description()))
-                b.setDescription(command.description());
-            if(b.getReleaseDate() != command.releaseDate())
-                b.setReleaseDate(command.releaseDate());
+        Book book = bookRepository.findBookByBookApiKey(new ApiKey(command.apiKey()))
+                .orElseThrow(() -> BookServiceException.noBookForApiKey(command.apiKey()));
 
-            b.setBookTypes(command.types().stream().map(BookType::valueOf).toList());
-            b.setGenres(command.genre().stream().map(BookGenre::valueOf).toList());
-            b.setAuthors(authors);
-            bookRepository.save(b);
-            return b;
-        }).orElseThrow(()-> BookServiceException.noBookForApiKey(command.apiKey()));
-       return BookDto.bookDtoFromBook(book);
+        List<Author> authors = command.authorIds().stream()
+                .map(ApiKey::new)
+                .map(authorRepository::findAuthorByAuthorApiKey)
+                .flatMap(Optional::stream)
+                .toList();
+        if (authors.isEmpty()) throw BookServiceException.noAuthors();
+
+        book.setName(command.name());
+        book.setAvailableOnline(command.availableOnline());
+        book.setDescription(command.description());
+        book.setReleaseDate(command.releaseDate());
+        book.setGenres(command.genre().stream().map(BookGenre::valueOf).toList());
+        book.setBookTypes(command.types().stream().map(BookType::valueOf).toList());
+        book.setAuthors(authors);
+
+        Book savedBook = bookRepository.save(book);
+
+        try {
+            mongoRepository.findByApiKey(command.apiKey()).ifPresent(doc -> {
+                doc.setName(command.name());
+                doc.setAvailableOnline(command.availableOnline());
+                doc.setDescription(command.description());
+                doc.setReleaseDate(command.releaseDate());
+                doc.setGenres(command.genre());
+                doc.setBookTypes(command.types());
+                doc.setAuthorApiKeys(authors.stream()
+                        .map(a -> a.getAuthorApiKey().apiKey())
+                        .toList());
+                mongoRepository.save(doc);
+            });
+            logger.debug("Book also updated in MongoDB: {}", command.apiKey());
+        } catch (Exception e) {
+            logger.error("Failed to update book in MongoDB", e);
+        }
+
+        return BookDto.bookDtoFromBook(savedBook);
     }
 
     @Transactional
     public BookDto updateBook2(BookCommand2 command) {
-        Book book = bookRepository.findBookByBookApiKey(new ApiKey(command.apiKey())).map((Book b)->{
-            List<Author> authors = command.authorPennames().stream()
-                    .map(authorRepository::findAuthorsByPenname)
-                    .flatMap(Optional::stream)
-                    .toList();
-            if(authors.isEmpty()){
-                throw BookServiceException.noAuthors();
-            }
-            if(!b.getName().equals(command.name()))
-                b.setName(command.name());
-            if(b.getAvailableOnline() != command.availableOnline()) {
-                b.setAvailableOnline(command.availableOnline());
+        logger.debug("entered updateBook2");
 
-            }
-            if(!b.getDescription().equals(command.description()))
-                b.setDescription(command.description());
-            if(b.getReleaseDate() != command.releaseDate())
-                b.setReleaseDate(command.releaseDate());
+        Book book = bookRepository.findBookByBookApiKey(new ApiKey(command.apiKey()))
+                .orElseThrow(() -> BookServiceException.noBookForApiKey(command.apiKey()));
 
-            b.setBookTypes(command.types().stream().map(BookType::valueOf).toList());
-            b.setGenres(command.genre().stream().map(BookGenre::valueOf).toList());
-            b.setAuthors(authors);
-            return b;
-        }).orElseThrow(()-> BookServiceException.noBookForApiKey(command.apiKey()));
-        return BookDto.bookDtoFromBook(book);
+        List<Author> authors = command.authorPennames().stream()
+                .map(authorRepository::findAuthorsByPenname)
+                .flatMap(Optional::stream)
+                .toList();
+        if (authors.isEmpty()) throw BookServiceException.noAuthors();
+
+        book.setName(command.name());
+        book.setAvailableOnline(command.availableOnline());
+        book.setDescription(command.description());
+        book.setReleaseDate(command.releaseDate());
+        book.setGenres(command.genre().stream().map(BookGenre::valueOf).toList());
+        book.setBookTypes(command.types().stream().map(BookType::valueOf).toList());
+        book.setAuthors(authors);
+
+        Book savedBook = bookRepository.save(book);
+
+        try {
+            mongoRepository.findByApiKey(command.apiKey()).ifPresent(doc -> {
+                doc.setName(command.name());
+                doc.setAvailableOnline(command.availableOnline());
+                doc.setDescription(command.description());
+                doc.setReleaseDate(command.releaseDate());
+                doc.setGenres(command.genre());
+                doc.setBookTypes(command.types());
+                doc.setAuthorApiKeys(authors.stream()
+                        .map(a -> a.getAuthorApiKey().apiKey())
+                        .toList());
+                mongoRepository.save(doc);
+            });
+            logger.debug("Book also updated in MongoDB: {}", command.apiKey());
+        } catch (Exception e) {
+            logger.error("Failed to update book in MongoDB", e);
+        }
+
+        return BookDto.bookDtoFromBook(savedBook);
     }
 
+    public BookDto getBook(String apiKey) {
+        logger.debug("entered getBook");
+        return bookRepository.findProjectedBookByBookApiKey(apiKey)
+                .orElseThrow(() -> BookServiceException.noBookForApiKey(apiKey));
+    }
+
+    public BookDto2 getBook2(String apiKey) {
+        logger.debug("entered getBook2");
+        return bookRepository.findProjectedBookByBookApiKey2(apiKey)
+                .orElseThrow(() -> BookServiceException.noBookForApiKey(apiKey));
+    }
 
     public List<BookDto> getBooks(String authorApiKey) {
         logger.debug("entered getBooks");
-        if (authorApiKey == null) {
-            return bookRepository.findAllProjected();
-        }
+        if (authorApiKey == null) return bookRepository.findAllProjected();
         var author = authorRepository.findProjectedAuthorByAuthorApiKey(authorApiKey)
-                .orElseThrow(()-> BookServiceException.noAuthorForApikey(authorApiKey));
+                .orElseThrow(() -> BookServiceException.noAuthorForApikey(authorApiKey));
         return bookRepository.findProjectedBooksByAuthorsContains(author.apiKey());
     }
 
     public List<BookDto2> getBooks2() {
+        logger.debug("entered getBooks2");
         return bookRepository.findAllProjected2();
     }
-    public BookDto2 getBook2(String bookApiKey) {
-        return bookRepository.findProjectedBookByBookApiKey2(bookApiKey)
-                .orElseThrow(()-> BookServiceException.noBookForApiKey(bookApiKey));
+
+    @Transactional
+    public void syncAllToMongo() {
+        logger.info("Starting sync from PostgreSQL to MongoDB");
+        List<Book> allBooks = bookRepository.findAll();
+        int synced = 0;
+        for (Book book : allBooks) {
+            try {
+                BookDocument doc = mapper.toMongoDocument(book);
+                mongoRepository.save(doc);
+                synced++;
+            } catch (Exception e) {
+                logger.error("Failed to sync book: {}", book.getBookApiKey().apiKey(), e);
+            }
+        }
+        logger.info("Synced {} of {} books to MongoDB", synced, allBooks.size());
     }
 
-    public BookDto getBook(String bookApiKey) {
-        logger.debug("entered getBook");
-       return bookRepository.findProjectedBookByBookApiKey(bookApiKey)
-               .orElseThrow(()-> BookServiceException.noBookForApiKey(bookApiKey));
-    }
-
-    public static class BookServiceException extends RuntimeException
-    {
-        public BookServiceException(String message)
-        {
+    public static class BookServiceException extends RuntimeException {
+        public BookServiceException(String message) {
             super(message);
         }
 
-        public static BookServiceException noBookForApiKey(String apiKey)
-        {
+        public static BookServiceException noBookForApiKey(String apiKey) {
             return new BookServiceException("Book with api key (%s) not existent".formatted(apiKey));
         }
 
-        public static BookServiceException noAuthors()
-        {
+        public static BookServiceException noAuthors() {
             return new BookServiceException("No Authors for Book");
         }
 
-        public static BookServiceException noAuthorForApikey(String apiKey)
-        {
+        public static BookServiceException noAuthorForApikey(String apiKey) {
             return new BookServiceException("Author with api key (%s) not existent".formatted(apiKey));
         }
-
     }
 }
