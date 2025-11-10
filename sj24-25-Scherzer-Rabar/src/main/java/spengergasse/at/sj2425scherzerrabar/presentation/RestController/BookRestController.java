@@ -84,21 +84,64 @@ public class BookRestController {
     }
 
     @Operation(summary = "Create a Book",
-            description = "Create a new Book to be saved in the database. The response is a link to the created Book object.")
+            description = "Create a new Book to be saved in the database (JPA + MongoDB Referencing + MongoDB Embedding). The response is a link to the created Book object.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = Book.class))})})
     @PostMapping
     public ResponseEntity<BookDto> createBook(@RequestBody BookCommand bookCommand) throws BadRequestException {
         logger.debug("entered bookrestcontroller createBook");
+        // Ruft die Standard-Methode auf, die ÜBERALL speichert
         BookDto createdBook = bookService.createBook(bookCommand);
 
         Link selfLink = linkTo(methodOn(BookRestController.class).getBook(createdBook.apiKey())).withSelfRel();
         return ResponseEntity.created(selfLink.toUri()).body(createdBook);
     }
 
+    @Operation(summary = "Create a Book (JPA only)",
+            description = "Create a new Book ONLY in PostgreSQL/JPA (no MongoDB). The response is a link to the created Book object.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Book.class))})})
+    @PostMapping("/jpa-only")
+    public ResponseEntity<BookDto> createBookJpaOnly(@RequestBody BookCommand bookCommand) throws BadRequestException {
+        logger.debug("entered bookrestcontroller createBookJpaOnly");
+        BookDto createdBook = bookService.createBookJpaOnly(bookCommand);
+
+        Link selfLink = linkTo(methodOn(BookRestController.class).getBook(createdBook.apiKey())).withSelfRel();
+        return ResponseEntity.created(selfLink.toUri()).body(createdBook);
+    }
+
+    @Operation(summary = "Create a Book (with Referencing)",
+            description = "Create a new Book in JPA + MongoDB (Referencing only). The response is a link to the created Book object.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Book.class))})})
+    @PostMapping("/referencing")
+    public ResponseEntity<BookDto> createBookWithReferencing(@RequestBody BookCommand bookCommand) throws BadRequestException {
+        logger.debug("entered bookrestcontroller createBookWithReferencing");
+        BookDto createdBook = bookService.createBookWithReferencing(bookCommand);
+
+        Link selfLink = linkTo(methodOn(BookRestController.class).getBook(createdBook.apiKey())).withSelfRel();
+        return ResponseEntity.created(selfLink.toUri()).body(createdBook);
+    }
+
+    @Operation(summary = "Create a Book (with Embedding)",
+            description = "Create a new Book in JPA + MongoDB (Embedding only). The response is a link to the created Book object.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Book.class))})})
+    @PostMapping("/embedding")
+    public ResponseEntity<BookDto> createBookWithEmbedding(@RequestBody BookCommand bookCommand) throws BadRequestException {
+        logger.debug("entered bookrestcontroller createBookWithEmbedding");
+        BookDto createdBook = bookService.createBookWithEmbedding(bookCommand);
+
+        Link selfLink = linkTo(methodOn(BookRestController.class).getBook(createdBook.apiKey())).withSelfRel();
+        return ResponseEntity.created(selfLink.toUri()).body(createdBook);
+    }
+
     @Operation(summary = "Update a Book",
-            description = "Update an existing Book. The response is an updated Book object.")
+            description = "Update an existing Book (JPA + both MongoDB collections). The response is an updated Book object.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = Book.class))}),
@@ -107,12 +150,13 @@ public class BookRestController {
     @PutMapping
     public ResponseEntity<BookDto> updateBook(@RequestBody BookCommand bookCommand) {
         logger.debug("entered bookrestcontroller updateBook");
+        // Ruft die Standard-Methode auf, die ÜBERALL updated
         BookDto book = bookService.updateBook(bookCommand);
         return ResponseEntity.ok(book);
     }
 
     @Operation(summary = "Delete a Book",
-            description = "Delete a existing Book.")
+            description = "Delete a existing Book (from JPA + both MongoDB collections).")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = Book.class))}),
@@ -121,8 +165,20 @@ public class BookRestController {
     @DeleteMapping
     public ResponseEntity<Void> deleteBook(@RequestParam String apiKey) {
         logger.debug("entered bookrestcontroller deleteBook");
+        // Ruft die Standard-Methode auf, die ÜBERALL löscht
         bookService.deleteBook(apiKey);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Sync all Books to MongoDB",
+            description = "Synchronizes all Books from PostgreSQL to both MongoDB collections (Referencing + Embedding).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sync completed successfully")})
+    @PostMapping("/sync-to-mongo")
+    public ResponseEntity<String> syncAllToMongo() {
+        logger.debug("entered bookrestcontroller syncAllToMongo");
+        bookService.syncAllToMongo();
+        return ResponseEntity.ok("Sync completed successfully");
     }
 
 }

@@ -76,6 +76,7 @@ public class BookController implements RedirectForwardSupport {
             return "books/create";
         }
 
+        // Ruft die Standard-Methode auf, die ÜBERALL speichert (JPA + MongoDB Referencing + Embedding)
         bookService.createBook2(book.getBookCommand());
         return redirectTo(BASE_URL);
     }
@@ -122,6 +123,7 @@ public class BookController implements RedirectForwardSupport {
                 form.getGenres().stream().map(Enum::name).toList()
         );
         logger.debug("entered Web BookController handleEditForm 2");
+        // Ruft die Standard-Methode auf, die ÜBERALL updated (JPA + MongoDB Referencing + Embedding)
         bookService.updateBook2(command);
         return redirectTo(BASE_URL);
     }
@@ -130,6 +132,7 @@ public class BookController implements RedirectForwardSupport {
     public String deleteBook(@RequestParam String apiKey, Model model) {
         logger.debug("entered Web BookController deleteBook");
         try {
+            // Ruft die Standard-Methode auf, die ÜBERALL löscht (JPA + MongoDB Referencing + Embedding)
             bookService.deleteBook(apiKey);
         } catch (Exception e) {
             logger.error("Error while deleting book", e);
