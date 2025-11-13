@@ -12,6 +12,7 @@ import spengergasse.at.sj2425scherzerrabar.persistence.converter.BookGenreConver
 import spengergasse.at.sj2425scherzerrabar.persistence.converter.BookTypeConverter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -34,7 +35,7 @@ public class Book {
     @ElementCollection
     @JoinTable(name = "BookTypes", foreignKey = @ForeignKey(name = "FK_book_types_2_book"))
     @Column(columnDefinition = BookTypeConverter.COLUMN_DEFINITION)
-    private List<BookType> bookTypes;
+    private List<BookType> bookTypes= new ArrayList<>();
     @NotNull
     @Min(100)
     @Max(Integer.MAX_VALUE)
@@ -42,7 +43,7 @@ public class Book {
     @ElementCollection
     @JoinTable(name = "genres_of_book", foreignKey = @ForeignKey(name = "FK_genres_2_book"))
     @Column(name = "genre_code", columnDefinition = BookGenreConverter.COLUMN_DEFINITION)
-    private List<BookGenre> genres;
+    private List<BookGenre> genres= new ArrayList<>();
     private String description;
     @ManyToMany(cascade = CascadeType.PERSIST
     )
@@ -51,7 +52,7 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "author_id",
                     foreignKey = @ForeignKey(name = "FK_authors_2_books"))
     )
-    private List<Author> authors;
+    private List<Author> authors = new ArrayList<>();
 
     public Book() {
         this.bookApiKey = new ApiKeyFactory().generate(30);

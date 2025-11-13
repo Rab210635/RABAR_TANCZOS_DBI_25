@@ -1,3 +1,4 @@
+<!-- books/create.html - KORRIGIERT -->
 <!DOCTYPE html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
@@ -47,8 +48,7 @@
                     <select id="genres" th:field="*{genres}" multiple class="form-select">
                         <option th:each="genre : ${T(spengergasse.at.sj2425scherzerrabar.domain.BookGenre).values()}"
                                 th:value="${genre}"
-                                th:text="${genre}"
-                                th:selected="*{genres != null} ? *{genres.contains(${genre})} : false">
+                                th:text="${genre}">
                         </option>
                     </select>
                     <div th:if="${#fields.hasErrors('genres')}" class="text-danger" th:errors="*{genres}"></div>
@@ -57,11 +57,9 @@
                 <div class="mb-3">
                     <label for="bookTypes" class="form-label">Types</label>
                     <select id="bookTypes" th:field="*{bookTypes}" multiple class="form-select">
-
                         <option th:each="type : ${T(spengergasse.at.sj2425scherzerrabar.domain.BookType).values()}"
                                 th:value="${type}"
-                                th:text="${type}"
-                                th:selected="*{bookTypes != null} ? *{bookTypes.contains(${type})} : false">
+                                th:text="${type}">
                         </option>
                     </select>
                     <div th:if="${#fields.hasErrors('bookTypes')}" class="text-danger" th:errors="*{bookTypes}"></div>
@@ -72,10 +70,8 @@
                     <select id="authors" th:field="*{authors}" multiple class="form-select">
                         <option th:each="author : ${existingAuthors}"
                                 th:value="${author.penname}"
-                                th:text="${author.penname}"
-                                th:selected="*{authors != null} ? *{authors.contains(${author.penname})} : false">
+                                th:text="${author.penname}">
                         </option>
-
                     </select>
                     <div th:if="${#fields.hasErrors('authors')}" class="text-danger" th:errors="*{authors}"></div>
                 </div>
@@ -90,3 +86,5 @@
 </section>
 </body>
 </html>
+
+<!-- ========================================== -->

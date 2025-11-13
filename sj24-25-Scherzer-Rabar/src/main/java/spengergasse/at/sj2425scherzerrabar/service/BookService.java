@@ -21,6 +21,7 @@ import spengergasse.at.sj2425scherzerrabar.persistence.BookMongoRepository;
 import spengergasse.at.sj2425scherzerrabar.persistence.BookRepository;
 import spengergasse.at.sj2425scherzerrabar.presentation.RestController.LoggingController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -354,10 +355,6 @@ public class BookService {
 
     // ==================== UPDATE METHODS ====================
 
-    /**
-     * Update Book ÜBERALL (JPA + beide MongoDB Collections)
-     * STANDARD-METHODE für Controller
-     */
     @Transactional
     public BookDto updateBook(BookCommand command) {
         logger.debug("entered updateBook (ALL)");
@@ -376,9 +373,15 @@ public class BookService {
         book.setAvailableOnline(command.availableOnline());
         book.setDescription(command.description());
         book.setReleaseDate(command.releaseDate());
-        book.setGenres(command.genre().stream().map(BookGenre::valueOf).toList());
-        book.setBookTypes(command.types().stream().map(BookType::valueOf).toList());
-        book.setAuthors(authors);
+
+        // FIX: Erstelle NEUE mutable Lists statt toList() zu verwenden
+        book.setGenres(new ArrayList<>(command.genre().stream()
+                .map(BookGenre::valueOf)
+                .toList()));
+        book.setBookTypes(new ArrayList<>(command.types().stream()
+                .map(BookType::valueOf)
+                .toList()));
+        book.setAuthors(new ArrayList<>(authors));
 
         Book savedBook = bookRepository.save(book);
 
@@ -389,8 +392,8 @@ public class BookService {
                 doc.setAvailableOnline(command.availableOnline());
                 doc.setDescription(command.description());
                 doc.setReleaseDate(command.releaseDate());
-                doc.setGenres(command.genre());
-                doc.setBookTypes(command.types());
+                doc.setGenres(new ArrayList<>(command.genre()));
+                doc.setBookTypes(new ArrayList<>(command.types()));
                 doc.setAuthorApiKeys(authors.stream()
                         .map(a -> a.getAuthorApiKey().apiKey())
                         .toList());
@@ -409,9 +412,9 @@ public class BookService {
                 doc.setAvailableOnline(updated.getAvailableOnline());
                 doc.setDescription(updated.getDescription());
                 doc.setReleaseDate(updated.getReleaseDate());
-                doc.setGenres(updated.getGenres());
-                doc.setBookTypes(updated.getBookTypes());
-                doc.setAuthors(updated.getAuthors());
+                doc.setGenres(new ArrayList<>(updated.getGenres()));
+                doc.setBookTypes(new ArrayList<>(updated.getBookTypes()));
+                doc.setAuthors(new ArrayList<>(updated.getAuthors()));
                 embeddedMongoRepository.save(doc);
             });
             logger.debug("Book updated in MongoDB (embedding): {}", command.apiKey());
@@ -422,10 +425,6 @@ public class BookService {
         return BookDto.bookDtoFromBook(savedBook);
     }
 
-    /**
-     * Update Book ÜBERALL (JPA + beide MongoDB Collections) mit Pennames
-     * STANDARD-METHODE für Controller
-     */
     @Transactional
     public BookDto updateBook2(BookCommand2 command) {
         logger.debug("entered updateBook2 (ALL)");
@@ -443,9 +442,15 @@ public class BookService {
         book.setAvailableOnline(command.availableOnline());
         book.setDescription(command.description());
         book.setReleaseDate(command.releaseDate());
-        book.setGenres(command.genre().stream().map(BookGenre::valueOf).toList());
-        book.setBookTypes(command.types().stream().map(BookType::valueOf).toList());
-        book.setAuthors(authors);
+
+        // FIX: Erstelle NEUE mutable Lists statt toList() zu verwenden
+        book.setGenres(new ArrayList<>(command.genre().stream()
+                .map(BookGenre::valueOf)
+                .toList()));
+        book.setBookTypes(new ArrayList<>(command.types().stream()
+                .map(BookType::valueOf)
+                .toList()));
+        book.setAuthors(new ArrayList<>(authors));
 
         Book savedBook = bookRepository.save(book);
 
@@ -456,8 +461,8 @@ public class BookService {
                 doc.setAvailableOnline(command.availableOnline());
                 doc.setDescription(command.description());
                 doc.setReleaseDate(command.releaseDate());
-                doc.setGenres(command.genre());
-                doc.setBookTypes(command.types());
+                doc.setGenres(new ArrayList<>(command.genre()));
+                doc.setBookTypes(new ArrayList<>(command.types()));
                 doc.setAuthorApiKeys(authors.stream()
                         .map(a -> a.getAuthorApiKey().apiKey())
                         .toList());
@@ -476,9 +481,9 @@ public class BookService {
                 doc.setAvailableOnline(updated.getAvailableOnline());
                 doc.setDescription(updated.getDescription());
                 doc.setReleaseDate(updated.getReleaseDate());
-                doc.setGenres(updated.getGenres());
-                doc.setBookTypes(updated.getBookTypes());
-                doc.setAuthors(updated.getAuthors());
+                doc.setGenres(new ArrayList<>(updated.getGenres()));
+                doc.setBookTypes(new ArrayList<>(updated.getBookTypes()));
+                doc.setAuthors(new ArrayList<>(updated.getAuthors()));
                 embeddedMongoRepository.save(doc);
             });
             logger.debug("Book updated in MongoDB (embedding): {}", command.apiKey());
@@ -488,6 +493,7 @@ public class BookService {
 
         return BookDto.bookDtoFromBook(savedBook);
     }
+
 
     // ==================== READ METHODS ====================
 
