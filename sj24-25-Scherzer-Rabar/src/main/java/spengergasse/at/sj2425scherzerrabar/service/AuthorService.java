@@ -15,6 +15,7 @@ import spengergasse.at.sj2425scherzerrabar.persistence.AuthorMongoRepository;
 import spengergasse.at.sj2425scherzerrabar.persistence.AuthorRepository;
 import spengergasse.at.sj2425scherzerrabar.presentation.RestController.LoggingController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,9 +35,60 @@ public class AuthorService {
         this.mapper = mapper;
     }
 
+    // ==================== CREATE METHODS ====================
+
+    /**
+     * Erstellt Author NUR in JPA/PostgreSQL
+     */
+    @Transactional
+    public AuthorDto createAuthorJpaOnly(AuthorCommand command) {
+        logger.debug("entered createAuthorJpaOnly");
+
+        Author author = new Author(
+                command.firstname(), command.lastname(),
+                command.address().stream().map(Address::addressFromString).toList(),
+                new EmailAddress(command.emailAddress()), command.penname()
+        );
+
+        Author savedAuthor = authorRepository.save(author);
+        logger.debug("Author saved to PostgreSQL only: {}", savedAuthor.getAuthorApiKey().apiKey());
+
+        return AuthorDto.authorDtoFromAuthor(savedAuthor);
+    }
+
+    /**
+     * Erstellt Author in JPA + MongoDB
+     */
+    @Transactional
+    public AuthorDto createAuthorWithMongo(AuthorCommand command) {
+        logger.debug("entered createAuthorWithMongo");
+
+        Author author = new Author(
+                command.firstname(), command.lastname(),
+                command.address().stream().map(Address::addressFromString).toList(),
+                new EmailAddress(command.emailAddress()), command.penname()
+        );
+
+        Author savedAuthor = authorRepository.save(author);
+
+        try {
+            AuthorDocument mongoDoc = mapper.toMongoDocument(savedAuthor);
+            mongoRepository.save(mongoDoc);
+            logger.debug("Author saved to JPA + MongoDB: {}", savedAuthor.getAuthorApiKey().apiKey());
+        } catch (Exception e) {
+            logger.error("Failed to save author to MongoDB", e);
+        }
+
+        return AuthorDto.authorDtoFromAuthor(savedAuthor);
+    }
+
+    /**
+     * Erstellt Author ÜBERALL (JPA + MongoDB)
+     * STANDARD-METHODE für Controller
+     */
     @Transactional
     public AuthorDto createAuthor(AuthorCommand command) {
-        logger.debug("entered createAuthor");
+        logger.debug("entered createAuthor (ALL)");
 
         // 1. Domain-Objekt erstellen
         Author author = new Author(
@@ -61,9 +113,15 @@ public class AuthorService {
         return AuthorDto.authorDtoFromAuthor(savedAuthor);
     }
 
+    // ==================== DELETE METHODS ====================
+
+    /**
+     * Löscht Author ÜBERALL (JPA + MongoDB)
+     * STANDARD-METHODE für Controller
+     */
     @Transactional
     public void deleteAuthor(String apiKey) {
-        logger.debug("entered deleteAuthor");
+        logger.debug("entered deleteAuthor (ALL)");
 
         // 1. Aus PostgreSQL löschen
         Author author = authorRepository.findAuthorByAuthorApiKey(new ApiKey(apiKey))
@@ -80,9 +138,78 @@ public class AuthorService {
         }
     }
 
+    // ==================== UPDATE METHODS ====================
+
+    /**
+     * Update Author NUR in JPA/PostgreSQL
+     */
+    @Transactional
+    public AuthorDto updateAuthorJpaOnly(AuthorCommand command) {
+        logger.debug("entered updateAuthorJpaOnly");
+
+        Author author = authorRepository.findAuthorByAuthorApiKey(new ApiKey(command.apiKey()))
+                .orElseThrow(() -> AuthorServiceException.noAuthorForApiKey(command.apiKey()));
+
+        author.setPenname(command.penname());
+        author.setFirstName(command.firstname());
+        author.setLastName(command.lastname());
+        author.setEmailAddress(new EmailAddress(command.emailAddress()));
+        author.setAddress(new ArrayList<>(command.address().stream().map(Address::addressFromString).toList()));
+
+        Author savedAuthor = authorRepository.save(author);
+        logger.debug("Author updated in PostgreSQL only: {}", savedAuthor.getAuthorApiKey().apiKey());
+
+        return AuthorDto.authorDtoFromAuthor(savedAuthor);
+    }
+
+    /**
+     * Update Author in JPA + MongoDB
+     */
+    @Transactional
+    public AuthorDto updateAuthorWithMongo(AuthorCommand command) {
+        logger.debug("entered updateAuthorWithMongo");
+
+        Author author = authorRepository.findAuthorByAuthorApiKey(new ApiKey(command.apiKey()))
+                .orElseThrow(() -> AuthorServiceException.noAuthorForApiKey(command.apiKey()));
+
+        author.setPenname(command.penname());
+        author.setFirstName(command.firstname());
+        author.setLastName(command.lastname());
+        author.setEmailAddress(new EmailAddress(command.emailAddress()));
+        author.setAddress(new ArrayList<>(command.address().stream().map(Address::addressFromString).toList()));
+
+        Author savedAuthor = authorRepository.save(author);
+
+        try {
+            mongoRepository.findByApiKey(command.apiKey())
+                    .ifPresent(doc -> {
+                        doc.setFirstName(command.firstname());
+                        doc.setLastName(command.lastname());
+                        doc.setPenname(command.penname());
+                        doc.setEmail(command.emailAddress());
+                        doc.setAddresses(
+                                command.address().stream()
+                                        .map(Address::addressFromString)
+                                        .map(AuthorDocument.AddressMongo::fromAddress)
+                                        .toList()
+                        );
+                        mongoRepository.save(doc);
+                    });
+            logger.debug("Author updated in JPA + MongoDB: {}", command.apiKey());
+        } catch (Exception e) {
+            logger.error("Failed to update author in MongoDB", e);
+        }
+
+        return AuthorDto.authorDtoFromAuthor(savedAuthor);
+    }
+
+    /**
+     * Update Author ÜBERALL (JPA + MongoDB)
+     * STANDARD-METHODE für Controller
+     */
     @Transactional
     public AuthorDto updateAuthor(AuthorCommand command) {
-        logger.debug("entered updateAuthor");
+        logger.debug("entered updateAuthor (ALL)");
 
         // 1. In PostgreSQL aktualisieren
         Author author = authorRepository.findAuthorByAuthorApiKey(new ApiKey(command.apiKey()))
@@ -92,7 +219,7 @@ public class AuthorService {
         author.setFirstName(command.firstname());
         author.setLastName(command.lastname());
         author.setEmailAddress(new EmailAddress(command.emailAddress()));
-        author.setAddress(command.address().stream().map(Address::addressFromString).toList());
+        author.setAddress(new ArrayList<>(command.address().stream().map(Address::addressFromString).toList()));
 
         Author savedAuthor = authorRepository.save(author);
 
@@ -121,6 +248,8 @@ public class AuthorService {
         return AuthorDto.authorDtoFromAuthor(savedAuthor);
     }
 
+    // ==================== READ METHODS ====================
+
     public AuthorDto getAuthor(String apiKey) {
         logger.debug("entered getAuthor");
         // Lesen aus PostgreSQL (Primary Database)
@@ -146,6 +275,8 @@ public class AuthorService {
                 .orElseThrow(() -> AuthorServiceException.noAuthorForEmail(emailAddress));
     }
 
+    // ==================== SYNC METHODS ====================
+
     /**
      * Synchronisiert alle Autoren von PostgreSQL zu MongoDB
      * Nützlich bei Inkonsistenzen oder Initial-Setup
@@ -168,6 +299,8 @@ public class AuthorService {
 
         logger.info("Synced {} of {} authors to MongoDB", synced, allAuthors.size());
     }
+
+    // ==================== EXCEPTION CLASS ====================
 
     public static class AuthorServiceException extends RuntimeException {
         public AuthorServiceException(String message) {
