@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import spengergasse.at.sj2425scherzerrabar.service.AuthorService;
 import spengergasse.at.sj2425scherzerrabar.service.BookService;
@@ -16,12 +17,6 @@ import spengergasse.at.sj2425scherzerrabar.service.BookService;
  * Uses TestSecurityConfig to bypass all authentication
  */
 @SpringBootTest
-@AutoConfigureMockMvc
-@Import(TestSecurityConfig.class)
-@TestPropertySource(properties = {
-        "spring.security.user.name=jaaron",
-        "spring.security.user.password=password"
-})
 public class DatabasePerformanceTest {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabasePerformanceTest.class);
