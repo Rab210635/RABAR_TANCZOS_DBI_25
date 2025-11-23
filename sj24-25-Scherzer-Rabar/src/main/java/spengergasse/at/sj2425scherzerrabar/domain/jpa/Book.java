@@ -45,7 +45,7 @@ public class Book {
     @Column(name = "genre_code", columnDefinition = BookGenreConverter.COLUMN_DEFINITION)
     private List<BookGenre> genres= new ArrayList<>();
     private String description;
-    @ManyToMany(cascade = CascadeType.PERSIST
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER
     )
     @JoinTable(name = "authors_of_book", joinColumns = @JoinColumn(name = "book_id",
             foreignKey = @ForeignKey(name = "FK_books_2_authors")),

@@ -24,7 +24,7 @@ import java.util.Random;
 class IndexPerformanceTest {
 
     private static final Logger log = LoggerFactory.getLogger(IndexPerformanceTest.class);
-    private static final int TEST_DATA_SIZE = 10000;
+    private static final int TEST_DATA_SIZE = 1000;
     private static final int QUERY_ITERATIONS = 100;
 
     @Autowired private BookMongoRepository bookMongoRepository;

@@ -7,16 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import spengergasse.at.sj2425scherzerrabar.mapper.BookEmbeddedMapper;
 import spengergasse.at.sj2425scherzerrabar.mapper.BookMapper;
-import spengergasse.at.sj2425scherzerrabar.persistence.AuthorRepository;
-import spengergasse.at.sj2425scherzerrabar.persistence.BookEmbeddedMongoRepository;
-import spengergasse.at.sj2425scherzerrabar.persistence.BookMongoRepository;
-import spengergasse.at.sj2425scherzerrabar.persistence.BookRepository;
+import spengergasse.at.sj2425scherzerrabar.persistence.*;
 import spengergasse.at.sj2425scherzerrabar.service.AuthorService;
 import spengergasse.at.sj2425scherzerrabar.service.BookService;
 
 /**
- * Performance test comparing JPA, MongoDB Embedding, and MongoDB Referencing
- * Tests CRUD operations at different scales: 100, 1000, 10000 records
+ * Comprehensive Performance Test
+ * Tests: Authors, Books, Mixed Queries
+ * Databases: JPA vs MongoDB (Embedding vs Referencing)
  */
 @SpringBootTest
 public class DatabasePerformanceTest {
@@ -42,28 +40,34 @@ public class DatabasePerformanceTest {
     private AuthorRepository authorRepository;
 
     @Autowired
+    private AuthorMongoRepository authorMongoRepository;
+
+    @Autowired
     private BookMapper bookMapper;
 
     @Autowired
     private BookEmbeddedMapper bookEmbeddedMapper;
 
     @Test
-    void runPerformanceSuite() {
-        logger.info("Starting performance tests: JPA vs MongoDB Embedding vs MongoDB Referencing");
+    void runComprehensivePerformanceSuite() {
+        logger.info("Starting COMPREHENSIVE performance tests");
+        logger.info("Testing: Authors | Books | Mixed Queries");
+        logger.info("Databases: JPA | MongoDB Embedding | MongoDB Referencing");
 
-        DatabasePerformanceTestRunner runner = new DatabasePerformanceTestRunner(
+        ComprehensivePerformanceTestRunner runner = new ComprehensivePerformanceTestRunner(
                 authorService,
                 bookService,
                 bookRepository,
                 mongoReferencingRepo,
                 mongoEmbeddingRepo,
                 authorRepository,
+                authorMongoRepository,
                 bookMapper,
                 bookEmbeddedMapper
         );
 
         runner.runTests();
 
-        logger.info("✅ Database performance test suite completed successfully.");
+        logger.info("✅ Comprehensive database performance test suite completed successfully.");
     }
 }

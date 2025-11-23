@@ -1,6 +1,6 @@
 package spengergasse.at.sj2425scherzerrabar.persistence;
 
-
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -20,13 +20,44 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findByAuthorsContains(Author author);
 
+    // ============ OPTIMIZED QUERIES WITH EAGER FETCHING ============
+
+    /**
+     * CRITICAL FIX: Uses @EntityGraph WITHOUT @Query
+     * This is the trick - let Spring Data JPA generate the query
+     */
+    @EntityGraph(attributePaths = {"authors", "bookTypes", "genres"})
+    List<Book> findAllBy();
+
+    /**
+     * Wrapper für Projection - nutzt optimierte Query mit EntityGraph
+     * Lädt authors, bookTypes, und genres eagerly
+     */
+    default List<BookDto> findAllProjectedOptimized() {
+        return findAllBy().stream()
+                .map(BookDto::bookDtoFromBook)
+                .toList();
+    }
+
+    /**
+     * Single book with all relations
+     */
+    @EntityGraph(attributePaths = {"authors", "bookTypes", "genres"})
+    Optional<Book> findByBookApiKey(ApiKey apiKey);
+
+    // ============ ALTE QUERIES (für Vergleich) ============
+
     @Query(""" 
-    SELECT new spengergasse.at.sj2425scherzerrabar.dtos.BookDto(b) FROM Book b WHERE b.bookApiKey.apiKey = :bookApiKey
+    SELECT new spengergasse.at.sj2425scherzerrabar.dtos.BookDto(b) 
+    FROM Book b 
+    WHERE b.bookApiKey.apiKey = :bookApiKey
     """)
     Optional<BookDto> findProjectedBookByBookApiKey(String bookApiKey);
 
     @Query(""" 
-    SELECT new spengergasse.at.sj2425scherzerrabar.dtos.BookDto2(b) FROM Book b WHERE b.bookApiKey.apiKey = :bookApiKey
+    SELECT new spengergasse.at.sj2425scherzerrabar.dtos.BookDto2(b) 
+    FROM Book b 
+    WHERE b.bookApiKey.apiKey = :bookApiKey
     """)
     Optional<BookDto2> findProjectedBookByBookApiKey2(String bookApiKey);
 
@@ -42,9 +73,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query("""
     select new spengergasse.at.sj2425scherzerrabar.dtos.BookDto(b) from Book b
-            WHERE exists (select a from b.authors a where a.authorApiKey.apiKey = :authorApiKey)
+    WHERE exists (select a from b.authors a where a.authorApiKey.apiKey = :authorApiKey)
     """)
     List<BookDto> findProjectedBooksByAuthorsContains(String authorApiKey);
-
-
 }
