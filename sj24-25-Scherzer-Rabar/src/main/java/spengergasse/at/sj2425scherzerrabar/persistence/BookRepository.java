@@ -29,6 +29,16 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @EntityGraph(attributePaths = {"authors", "bookTypes", "genres"})
     List<Book> findAllBy();
 
+
+    @Query("""
+select distinct new spengergasse.at.sj2425scherzerrabar.dtos.BookDto(b)
+from Book b
+left join fetch b.authors
+left join fetch b.bookTypes
+left join fetch b.genres
+""")
+    List<BookDto> findAllOptimizedProjection();
+
     /**
      * Wrapper für Projection - nutzt optimierte Query mit EntityGraph
      * Lädt authors, bookTypes, und genres eagerly

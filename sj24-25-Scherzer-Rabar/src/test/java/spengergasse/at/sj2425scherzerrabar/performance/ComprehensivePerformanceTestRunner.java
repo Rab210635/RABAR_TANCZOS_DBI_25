@@ -385,7 +385,7 @@ public class ComprehensivePerformanceTestRunner {
 
         long startTime = System.currentTimeMillis();
         try {
-            List<BookDto> books = bookRepository.findAllProjectedOptimized();
+            List<BookDto> books = bookRepository.findAllOptimizedProjection();
             long duration = System.currentTimeMillis() - startTime;
             recordResult(scaleKey, "Book: Projection (OPTIMIZED)", "JPA", duration);
             logger.info("✓ JPA OPTIMIZED Projection: {} ms (JOIN FETCH!)", duration);
