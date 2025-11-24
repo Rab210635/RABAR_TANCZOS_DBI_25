@@ -6,9 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import spengergasse.at.sj2425scherzerrabar.MongoDBIndexConfiguration;
 import spengergasse.at.sj2425scherzerrabar.domain.mongo.BookDocument;
+import spengergasse.at.sj2425scherzerrabar.domain.mongo.BookDocumentEmbedded;
 import spengergasse.at.sj2425scherzerrabar.persistence.BookEmbeddedMongoRepository;
 import spengergasse.at.sj2425scherzerrabar.persistence.BookMongoRepository;
+import spengergasse.at.sj2425scherzerrabar.MongoIndexManager;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,7 +27,7 @@ import java.util.Random;
 class IndexPerformanceTest {
 
     private static final Logger log = LoggerFactory.getLogger(IndexPerformanceTest.class);
-    private static final int TEST_DATA_SIZE = 1000;
+    private static final int TEST_DATA_SIZE = 10000;
     private static final int QUERY_ITERATIONS = 100;
 
     @Autowired private BookMongoRepository bookMongoRepository;
@@ -38,10 +41,10 @@ class IndexPerformanceTest {
 
     @BeforeAll
     static void beforeAll() {
-        log.info("\n" + "=".repeat(80));
-        log.info("INDEX PERFORMANCE TEST");
-        log.info("Testing query performance with and without indexes");
-        log.info("=".repeat(80));
+        log.info("\n" + "=".repeat(120));
+        log.info("MONGODB INDEX PERFORMANCE TEST");
+        log.info("Comparing query performance with and without indexes");
+        log.info("=".repeat(120));
     }
 
     @BeforeEach
@@ -67,21 +70,10 @@ class IndexPerformanceTest {
     @Order(1)
     @DisplayName("Query Performance WITHOUT Indexes")
     void testPerformanceWithoutIndexes() {
-        log.info("\n" + "=".repeat(80));
-        log.info("TEST 1: QUERY PERFORMANCE WITHOUT INDEXES");
-        log.info("=".repeat(80));
-
-        // Drop all indexes
-        log.info("Dropping all indexes...");
-        indexConfig.dropAllIndexes();
-        indexManager.printAllIndexes();
-
-        // Create test data
-        log.info("Creating {} test documents...", TEST_DATA_SIZE);
-        createTestData(TEST_DATA_SIZE);
-
-        // Run tests
-        runQueryTests("WITHOUT INDEXES");
+        // This test is now integrated into testIndexComparison()
+        // Keeping it here for individual execution if needed
+        log.info("\nExecuting individual test without indexes...");
+        log.info("For complete comparison, run testIndexComparison() instead.");
     }
 
     // ==================== TEST 2: WITH INDEXES ====================
@@ -90,21 +82,10 @@ class IndexPerformanceTest {
     @Order(2)
     @DisplayName("Query Performance WITH Indexes")
     void testPerformanceWithIndexes() {
-        log.info("\n" + "=".repeat(80));
-        log.info("TEST 2: QUERY PERFORMANCE WITH INDEXES");
-        log.info("=".repeat(80));
-
-        // Create indexes
-        log.info("Creating indexes...");
-        indexConfig.initIndexes();
-        indexManager.printAllIndexes();
-
-        // Create test data
-        log.info("Creating {} test documents...", TEST_DATA_SIZE);
-        createTestData(TEST_DATA_SIZE);
-
-        // Run tests
-        runQueryTests("WITH INDEXES");
+        // This test is now integrated into testIndexComparison()
+        // Keeping it here for individual execution if needed
+        log.info("\nExecuting individual test with indexes...");
+        log.info("For complete comparison, run testIndexComparison() instead.");
     }
 
     // ==================== TEST 3: COMPARISON ====================
@@ -113,19 +94,19 @@ class IndexPerformanceTest {
     @Order(3)
     @DisplayName("Index Performance Comparison")
     void testIndexComparison() {
-        log.info("\n" + "=".repeat(80));
-        log.info("TEST 3: COMPREHENSIVE INDEX COMPARISON");
-        log.info("=".repeat(80));
+        log.info("\n" + "=".repeat(120));
+        log.info("INDEX PERFORMANCE COMPARISON - MONGODB");
+        log.info("=".repeat(120));
 
         List<ComparisonResult> results = new ArrayList<>();
 
         // Test WITHOUT indexes
-        log.info("\n--- Phase 1: Testing WITHOUT indexes ---");
+        log.info("\nPhase 1: Testing WITHOUT indexes (creating {} documents)...", TEST_DATA_SIZE);
         cleanupAll();
         indexConfig.dropAllIndexes();
         createTestData(TEST_DATA_SIZE);
 
-        ComparisonResult withoutIndexes = new ComparisonResult("WITHOUT INDEXES");
+        ComparisonResult withoutIndexes = new ComparisonResult("Without Indexes");
         withoutIndexes.findByApiKey = measureFindByApiKey(QUERY_ITERATIONS);
         withoutIndexes.findByAuthor = measureFindByAuthor(QUERY_ITERATIONS);
         withoutIndexes.findByGenre = measureFindByGenre(QUERY_ITERATIONS);
@@ -133,12 +114,12 @@ class IndexPerformanceTest {
         results.add(withoutIndexes);
 
         // Test WITH indexes
-        log.info("\n--- Phase 2: Testing WITH indexes ---");
+        log.info("Phase 2: Testing WITH indexes (creating {} documents)...", TEST_DATA_SIZE);
         cleanupAll();
         indexConfig.initIndexes();
         createTestData(TEST_DATA_SIZE);
 
-        ComparisonResult withIndexes = new ComparisonResult("WITH INDEXES");
+        ComparisonResult withIndexes = new ComparisonResult("With Indexes");
         withIndexes.findByApiKey = measureFindByApiKey(QUERY_ITERATIONS);
         withIndexes.findByAuthor = measureFindByAuthor(QUERY_ITERATIONS);
         withIndexes.findByGenre = measureFindByGenre(QUERY_ITERATIONS);
@@ -152,27 +133,11 @@ class IndexPerformanceTest {
     // ==================== QUERY METHODS ====================
 
     private void runQueryTests(String testName) {
-        log.info("\nRunning query tests ({})...", testName);
-
-        log.info("\n1. Find by API Key:");
-        long apiKeyTime = measureFindByApiKey(QUERY_ITERATIONS);
-        log.info("   Average time: {:.3f} ms", apiKeyTime / 1_000_000.0 / QUERY_ITERATIONS);
-
-        log.info("\n2. Find by Author:");
-        long authorTime = measureFindByAuthor(QUERY_ITERATIONS);
-        log.info("   Average time: {:.3f} ms", authorTime / 1_000_000.0 / QUERY_ITERATIONS);
-
-        log.info("\n3. Find by Genre:");
-        long genreTime = measureFindByGenre(QUERY_ITERATIONS);
-        log.info("   Average time: {:.3f} ms", genreTime / 1_000_000.0 / QUERY_ITERATIONS);
-
-        log.info("\n4. Find Sorted by Name:");
-        long sortTime = measureFindSortedByName(QUERY_ITERATIONS);
-        log.info("   Average time: {:.3f} ms", sortTime / 1_000_000.0 / QUERY_ITERATIONS);
-
-        log.info("\nTotal test time for {}: {:.3f} ms\n",
-                testName,
-                (apiKeyTime + authorTime + genreTime + sortTime) / 1_000_000.0);
+        // Silent execution - only final table will be printed
+        measureFindByApiKey(QUERY_ITERATIONS);
+        measureFindByAuthor(QUERY_ITERATIONS);
+        measureFindByGenre(QUERY_ITERATIONS);
+        measureFindSortedByName(QUERY_ITERATIONS);
     }
 
     private long measureFindByApiKey(int iterations) {
@@ -272,7 +237,6 @@ class IndexPerformanceTest {
         }
 
         bookMongoRepository.saveAll(books);
-        log.info("Created {} books", books.size());
     }
 
     // ==================== RESULT CLASSES ====================
@@ -294,15 +258,17 @@ class IndexPerformanceTest {
     }
 
     private void printComparisonResults(List<ComparisonResult> results) {
-        log.info("\n" + "=".repeat(80));
-        log.info("COMPARISON RESULTS");
-        log.info("=".repeat(80));
-        log.info(String.format("\n%-20s | %-15s | %-15s | %-15s | %-15s | %-15s",
-                "Test", "Find by API", "Find by Author", "Find by Genre", "Find Sorted", "Total"));
+        log.info("\n" + "=".repeat(120));
+        log.info("MONGODB INDEX PERFORMANCE TEST RESULTS");
+        log.info("Data Size: {} documents | Query Iterations: {} per operation", TEST_DATA_SIZE, QUERY_ITERATIONS);
+        log.info("=".repeat(120));
+
+        log.info(String.format("\n%-20s | %-18s | %-18s | %-18s | %-18s | %-18s",
+                "Configuration", "Find by API Key", "Find by Author", "Find by Genre", "Find Sorted", "TOTAL"));
         log.info("-".repeat(120));
 
         for (ComparisonResult result : results) {
-            log.info(String.format("%-20s | %10.3f ms | %10.3f ms | %10.3f ms | %10.3f ms | %10.3f ms",
+            log.info(String.format("%-20s | %13.3f ms | %13.3f ms | %13.3f ms | %13.3f ms | %13.3f ms",
                     result.testName,
                     result.findByApiKey / 1_000_000.0,
                     result.findByAuthor / 1_000_000.0,
@@ -315,9 +281,7 @@ class IndexPerformanceTest {
             ComparisonResult without = results.get(0);
             ComparisonResult with = results.get(1);
 
-            log.info("\n" + "=".repeat(80));
-            log.info("IMPROVEMENT FACTORS (Speedup with indexes)");
-            log.info("=".repeat(80));
+            log.info("-".repeat(120));
 
             double apiKeyImprovement = (double) without.findByApiKey / with.findByApiKey;
             double authorImprovement = (double) without.findByAuthor / with.findByAuthor;
@@ -325,13 +289,15 @@ class IndexPerformanceTest {
             double sortedImprovement = (double) without.findSortedByName / with.findSortedByName;
             double totalImprovement = (double) without.getTotal() / with.getTotal();
 
-            log.info("Find by API Key:    {:.2f}x faster", apiKeyImprovement);
-            log.info("Find by Author:     {:.2f}x faster", authorImprovement);
-            log.info("Find by Genre:      {:.2f}x faster", genreImprovement);
-            log.info("Find Sorted:        {:.2f}x faster", sortedImprovement);
-            log.info("Overall:            {:.2f}x faster", totalImprovement);
+            log.info(String.format("%-20s | %13.2fx | %13.2fx | %13.2fx | %13.2fx | %13.2fx",
+                    "Speedup Factor",
+                    apiKeyImprovement,
+                    authorImprovement,
+                    genreImprovement,
+                    sortedImprovement,
+                    totalImprovement));
         }
 
-        log.info("=".repeat(80) + "\n");
+        log.info("=".repeat(120) + "\n");
     }
 }

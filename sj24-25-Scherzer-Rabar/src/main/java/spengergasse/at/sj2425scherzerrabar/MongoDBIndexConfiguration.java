@@ -205,28 +205,4 @@ public class MongoDBIndexConfiguration {
 
         log.info("All MongoDB indexes dropped");
     }
-
-    /**
-     * Method to list all indexes for a collection
-     */
-    public void listIndexes() {
-        log.info("\n========== MongoDB Indexes ==========");
-
-        log.info("\nAuthor Collection Indexes:");
-        mongoTemplate.indexOps(AuthorDocument.class).getIndexInfo().forEach(indexInfo -> {
-            log.info("  - {}: {}", indexInfo.getName(), indexInfo.getIndexFields());
-        });
-
-        log.info("\nBook Collection (Referencing) Indexes:");
-        mongoTemplate.indexOps(BookDocument.class).getIndexInfo().forEach(indexInfo -> {
-            log.info("  - {}: {}", indexInfo.getName(), indexInfo.getIndexFields());
-        });
-
-        log.info("\nBook Collection (Embedding) Indexes:");
-        mongoTemplate.indexOps(BookDocumentEmbedded.class).getIndexInfo().forEach(indexInfo -> {
-            log.info("  - {}: {}", indexInfo.getName(), indexInfo.getIndexFields());
-        });
-
-        log.info("\n====================================");
-    }
 }

@@ -18,55 +18,17 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public InMemoryUserDetailsManager userDetailsManager() {
-        return new InMemoryUserDetailsManager(User.withUsername("jaaron")
-                .password("{noop}password") // {noop} heißt: kein Passwort-Encoding
-                .authorities("read")
-                .build()
-        );
-    }
-
-    @Bean
-    @Order(1)
-    public SecurityFilterChain apiTokenFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/token")
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults()) // Basic Auth
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(AbstractHttpConfigurer::disable);
+
         return http.build();
     }
-
-    @Bean
-    @Order(2)
-    public SecurityFilterChain apiJwtFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/api/**")
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(Customizer.withDefaults()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        return http.build();
-    }
-
-
-
-
-    @Bean
-    @Order(3)
-    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
-       return http.csrf(Customizer.withDefaults())
-               .authorizeHttpRequests(authorize->authorize
-                       .requestMatchers("/").permitAll()
-                       .requestMatchers("/login").permitAll()
-                       .requestMatchers("/error").permitAll()
-                       .requestMatchers("/logout/**").permitAll()
-                       .anyRequest().authenticated())
-               .formLogin(formLogin->formLogin.defaultSuccessUrl("/",true))
-               .httpBasic(AbstractHttpConfigurer::disable)
-               .build();
-    }
-
 
 }
