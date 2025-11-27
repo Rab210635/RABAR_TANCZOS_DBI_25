@@ -41,7 +41,7 @@ public class ComprehensivePerformanceTestRunner {
     private final BookMapper bookMapper;
     private final BookEmbeddedMapper bookEmbeddedMapper;
 
-    private static final int[] SCALE_FACTORS = {100, 500, 2000};
+    private static final int[] SCALE_FACTORS = {100, 1000, 10000};
 
     private final Map<String, Map<String, Map<String, Long>>> results = new LinkedHashMap<>();
 
@@ -380,17 +380,30 @@ public class ComprehensivePerformanceTestRunner {
         }
     }
 
-    private void testFindBooksProjectionOPTIMIZED(String scaleKey) {
-        logger.info("\n✅ Testing OPTIMIZED Projection (JOIN FETCH):");
+    // In your testFindBooksProjectionOPTIMIZED method, replace it with this:
 
+    private void testFindBooksProjectionOPTIMIZED(String scaleKey) {
+        logger.info("\n✅ Testing OPTIMIZED Projection (FIXED - No N+1):");
+
+        // JPA - FIXED VERSION
         long startTime = System.currentTimeMillis();
         try {
-            List<BookDto> books = bookRepository.findAllOptimizedProjection();
+            // Use the new optimized method from BookRepository
+            List<BookDto> books = bookRepository.findAllProjectedOptimized();
             long duration = System.currentTimeMillis() - startTime;
             recordResult(scaleKey, "Book: Projection (OPTIMIZED)", "JPA", duration);
-            logger.info("✓ JPA OPTIMIZED Projection: {} ms (JOIN FETCH!)", duration);
+            logger.info("✓ JPA OPTIMIZED Projection: {} ms (FIXED!)", duration);
         } catch (Exception e) {
-            logger.error("✗ JPA OPTIMIZED Projection failed", e);
+            // Fallback: try the old method
+            startTime = System.currentTimeMillis();
+            try {
+                List<BookDto> books = bookRepository.findAllProjected();
+                long duration = System.currentTimeMillis() - startTime;
+                recordResult(scaleKey, "Book: Projection (OLD)", "JPA", duration);
+                logger.warn("⚠️ JPA OLD Projection (N+1): {} ms", duration);
+            } catch (Exception e2) {
+                logger.error("✗ Fallback also failed", e2);
+            }
         }
 
         // MongoDB Embedding

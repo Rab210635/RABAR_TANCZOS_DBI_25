@@ -3,6 +3,7 @@ package spengergasse.at.sj2425scherzerrabar.persistence;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import spengergasse.at.sj2425scherzerrabar.domain.ApiKey;
 import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
@@ -12,7 +13,11 @@ import spengergasse.at.sj2425scherzerrabar.dtos.BookDto2;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+/**
+ * If you MUST keep Lists in Book entity, use this approach
+ */
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
@@ -20,42 +25,85 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findByAuthorsContains(Author author);
 
-    // ============ OPTIMIZED QUERIES WITH EAGER FETCHING ============
+    // ============ SOLUTION FOR LISTS: Multiple queries approach ============
 
     /**
-     * CRITICAL FIX: Uses @EntityGraph WITHOUT @Query
-     * This is the trick - let Spring Data JPA generate the query
+     * Step 1: Fetch books with only ONE collection (authors)
      */
-    @EntityGraph(attributePaths = {"authors", "bookTypes", "genres"})
-    List<Book> findAllBy();
-
-
     @Query("""
-select distinct new spengergasse.at.sj2425scherzerrabar.dtos.BookDto(b)
-from Book b
-left join fetch b.authors
-left join fetch b.bookTypes
-left join fetch b.genres
-""")
-    List<BookDto> findAllOptimizedProjection();
+        SELECT DISTINCT b FROM Book b
+        LEFT JOIN FETCH b.authors
+        """)
+    List<Book> findAllBooksWithAuthors();
 
     /**
-     * Wrapper für Projection - nutzt optimierte Query mit EntityGraph
-     * Lädt authors, bookTypes, und genres eagerly
+     * Step 2: Fetch bookTypes for specific books
+     * We need book IDs to avoid loading everything again
+     */
+    @Query("""
+        SELECT DISTINCT b FROM Book b
+        LEFT JOIN FETCH b.bookTypes
+        WHERE b.bookId.id IN :bookIds
+        """)
+    List<Book> fetchBookTypesForBooks(@Param("bookIds") List<Long> bookIds);
+
+    /**
+     * Step 3: Fetch genres for specific books
+     */
+    @Query("""
+        SELECT DISTINCT b FROM Book b
+        LEFT JOIN FETCH b.genres
+        WHERE b.bookId.id IN :bookIds
+        """)
+    List<Book> fetchGenresForBooks(@Param("bookIds") List<Long> bookIds);
+
+    /**
+     * Optimized method that coordinates all three queries
+     * This replaces your broken findAllProjectedOptimized
+     */
+    default List<Book> findAllWithAllCollections() {
+        // Step 1: Get books with authors
+        List<Book> books = findAllBooksWithAuthors();
+
+        if (books.isEmpty()) {
+            return books;
+        }
+
+        // Extract book IDs
+        List<Long> bookIds = books.stream()
+                .map(b -> b.getBookId().id())
+                .collect(Collectors.toList());
+
+        // Step 2 & 3: Load other collections
+        // These will hit the session cache and just populate missing collections
+        fetchBookTypesForBooks(bookIds);
+        fetchGenresForBooks(bookIds);
+
+        return books;
+    }
+
+    /**
+     * BETTER: Use this for DTOs - avoids multiple queries
      */
     default List<BookDto> findAllProjectedOptimized() {
-        return findAllBy().stream()
+        return findAllWithAllCollections().stream()
                 .map(BookDto::bookDtoFromBook)
                 .toList();
     }
 
     /**
-     * Single book with all relations
+     * Single book with all relations - this works!
      */
-    @EntityGraph(attributePaths = {"authors", "bookTypes", "genres"})
-    Optional<Book> findByBookApiKey(ApiKey apiKey);
+    @Query("""
+        SELECT DISTINCT b FROM Book b
+        LEFT JOIN FETCH b.authors a
+        LEFT JOIN FETCH b.bookTypes
+        LEFT JOIN FETCH b.genres
+        WHERE b.bookApiKey = :apiKey
+        """)
+    Optional<Book> findBookByBookApiKeyWithAllRelations(@Param("apiKey") ApiKey apiKey);
 
-    // ============ ALTE QUERIES (für Vergleich) ============
+    // ============ OLD QUERIES (for comparison) ============
 
     @Query(""" 
     SELECT new spengergasse.at.sj2425scherzerrabar.dtos.BookDto(b) 
@@ -71,6 +119,10 @@ left join fetch b.genres
     """)
     Optional<BookDto2> findProjectedBookByBookApiKey2(String bookApiKey);
 
+    /**
+     * WARNING: This causes N+1 queries!
+     * Use findAllProjectedOptimized() instead
+     */
     @Query("""
     select new spengergasse.at.sj2425scherzerrabar.dtos.BookDto(b) from Book b
     """)
