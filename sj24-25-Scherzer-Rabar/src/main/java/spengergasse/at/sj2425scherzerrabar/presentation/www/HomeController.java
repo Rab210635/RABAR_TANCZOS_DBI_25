@@ -31,7 +31,7 @@ public class HomeController implements RedirectForwardSupport {
                                 Principal principal
     ) {
         logger.debug("entered Web AuthorController getAllAuthors");
-        model.addAttribute("principal", principal.getName());
+        //model.addAttribute("principal", principal.getName());
         model.addAttribute("error", error);
         return "home";
     }
