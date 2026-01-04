@@ -51,6 +51,105 @@ public class BookService {
         this.embeddedMapper = embeddedMapper;
     }
 
+    // ==================== BATCH CREATE METHODS (PERFORMANCE FIX) ====================
+
+    @Transactional
+    public List<String> createBooksBatchJpaOnly(List<BookCommand> commands) {
+        logger.debug("entered createBooksBatchJpaOnly with {} books", commands.size());
+        List<Book> books = new ArrayList<>();
+
+        for (BookCommand command : commands) {
+            List<Author> authors = command.authorIds().stream()
+                    .map(ApiKey::new)
+                    .map(authorRepository::findAuthorByAuthorApiKey)
+                    .flatMap(Optional::stream)
+                    .toList();
+
+            books.add(new Book(
+                    command.name(), command.releaseDate(), command.availableOnline(), command.wordCount(),
+                    command.genre().stream().map(BookGenre::valueOf).toList(),
+                    authors, command.types().stream().map(BookType::valueOf).toList(),
+                    command.description()
+            ));
+        }
+
+        // JPA Batch Insert (saveAll utilizes Hibernate JDBC batching)
+        List<Book> savedBooks = bookRepository.saveAll(books);
+        return savedBooks.stream().map(b -> b.getBookApiKey().apiKey()).toList();
+    }
+
+    @Transactional
+    public List<String> createBooksBatchReferencing(List<BookCommand> commands) {
+        logger.debug("entered createBooksBatchReferencing with {} books", commands.size());
+        List<Book> books = new ArrayList<>();
+
+        // 1. Prepare Entities
+        for (BookCommand command : commands) {
+            List<Author> authors = command.authorIds().stream()
+                    .map(ApiKey::new)
+                    .map(authorRepository::findAuthorByAuthorApiKey)
+                    .flatMap(Optional::stream)
+                    .toList();
+            books.add(new Book(
+                    command.name(), command.releaseDate(), command.availableOnline(), command.wordCount(),
+                    command.genre().stream().map(BookGenre::valueOf).toList(),
+                    authors, command.types().stream().map(BookType::valueOf).toList(),
+                    command.description()
+            ));
+        }
+
+        // 2. JPA Batch Save
+        List<Book> savedBooks = bookRepository.saveAll(books);
+
+        // 3. Mongo Batch Save
+        try {
+            List<BookDocument> mongoDocs = savedBooks.stream()
+                    .map(mapper::toMongoDocument)
+                    .toList();
+            mongoRepository.saveAll(mongoDocs);
+        } catch (Exception e) {
+            logger.error("Failed to batch save books to MongoDB (referencing)", e);
+        }
+
+        return savedBooks.stream().map(b -> b.getBookApiKey().apiKey()).toList();
+    }
+
+    @Transactional
+    public List<String> createBooksBatchEmbedding(List<BookCommand> commands) {
+        logger.debug("entered createBooksBatchEmbedding with {} books", commands.size());
+        List<Book> books = new ArrayList<>();
+
+        // 1. Prepare Entities
+        for (BookCommand command : commands) {
+            List<Author> authors = command.authorIds().stream()
+                    .map(ApiKey::new)
+                    .map(authorRepository::findAuthorByAuthorApiKey)
+                    .flatMap(Optional::stream)
+                    .toList();
+            books.add(new Book(
+                    command.name(), command.releaseDate(), command.availableOnline(), command.wordCount(),
+                    command.genre().stream().map(BookGenre::valueOf).toList(),
+                    authors, command.types().stream().map(BookType::valueOf).toList(),
+                    command.description()
+            ));
+        }
+
+        // 2. JPA Batch Save
+        List<Book> savedBooks = bookRepository.saveAll(books);
+
+        // 3. Mongo Batch Save
+        try {
+            List<BookDocumentEmbedded> mongoDocs = savedBooks.stream()
+                    .map(embeddedMapper::toMongoDocument)
+                    .toList();
+            embeddedMongoRepository.saveAll(mongoDocs);
+        } catch (Exception e) {
+            logger.error("Failed to batch save books to MongoDB (embedding)", e);
+        }
+
+        return savedBooks.stream().map(b -> b.getBookApiKey().apiKey()).toList();
+    }
+
     // ==================== CREATE METHODS ====================
 
     /**

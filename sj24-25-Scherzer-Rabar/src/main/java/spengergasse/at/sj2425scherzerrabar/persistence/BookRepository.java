@@ -1,10 +1,10 @@
 package spengergasse.at.sj2425scherzerrabar.persistence;
 
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import spengergasse.at.sj2425scherzerrabar.domain.ApiKey;
 import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
 import spengergasse.at.sj2425scherzerrabar.domain.jpa.Book;
@@ -60,7 +60,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     /**
      * Optimized method that coordinates all three queries
      * This replaces your broken findAllProjectedOptimized
+     * * ADDED @Transactional: Ensures all 3 steps happen in ONE session/transaction.
+     * This keeps the 'books' list entities managed, allowing steps 2 & 3
+     * to populate the existing entities in the Level 1 cache.
      */
+    @Transactional(readOnly = true)
     default List<Book> findAllWithAllCollections() {
         // Step 1: Get books with authors
         List<Book> books = findAllBooksWithAuthors();
@@ -76,6 +80,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
         // Step 2 & 3: Load other collections
         // These will hit the session cache and just populate missing collections
+        // Because of @Transactional, 'books' are still attached to the session here.
         fetchBookTypesForBooks(bookIds);
         fetchGenresForBooks(bookIds);
 
@@ -84,7 +89,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     /**
      * BETTER: Use this for DTOs - avoids multiple queries
+     * ADDED @Transactional: Needed here too because stream mapping occurs lazily/inside this method scope.
      */
+    @Transactional(readOnly = true)
     default List<BookDto> findAllProjectedOptimized() {
         return findAllWithAllCollections().stream()
                 .map(BookDto::bookDtoFromBook)
