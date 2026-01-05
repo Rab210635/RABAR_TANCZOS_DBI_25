@@ -15,6 +15,8 @@ public interface BookEmbeddedMongoRepository extends MongoRepository<BookDocumen
 
     Optional<BookDocumentEmbedded> findByApiKey(String apiKey);
 
+    @Query("{ 'authors.api_key': ?0 }")
+    List<BookDocumentEmbedded> findByAuthorApiKey(String authorApiKey);
     /**
      * Sucht Books, die einen Author mit dem angegebenen API-Key enthalten.
      * Funktioniert mit embedded Authors.

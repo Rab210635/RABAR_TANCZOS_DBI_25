@@ -43,6 +43,7 @@ public class BookDocument {
 
     @Field("author_api_keys")
     private List<String> authorApiKeys = new ArrayList<>();
+    private List<String> authorIds;
 
     public BookDocument() {
     }
@@ -146,5 +147,13 @@ public class BookDocument {
 
     public void setAuthorApiKeys(List<String> authorApiKeys) {
         this.authorApiKeys = authorApiKeys;
+    }
+
+    public List<String> getAuthorIds() {
+        return authorIds;
+    }
+
+    public void setAuthorIds(List<String> authorIds) {
+        this.authorIds = authorIds;
     }
 }

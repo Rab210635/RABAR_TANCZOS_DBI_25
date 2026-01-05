@@ -2,6 +2,7 @@ package spengergasse.at.sj2425scherzerrabar.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import spengergasse.at.sj2425scherzerrabar.domain.ApiKey;
 import spengergasse.at.sj2425scherzerrabar.domain.jpa.Author;
@@ -46,4 +47,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     ) from Author a where a.emailAddress.email = :email
     """)
     Optional<AuthorDto> findProjectedAuthorByEmailAddress_Email(String email);
+    @Query("SELECT a FROM Author a LEFT JOIN FETCH a.books WHERE a.authorApiKey = :apiKey")
+    Optional<Author> findAuthorWithBooks(@Param("apiKey") ApiKey apiKey);
 }

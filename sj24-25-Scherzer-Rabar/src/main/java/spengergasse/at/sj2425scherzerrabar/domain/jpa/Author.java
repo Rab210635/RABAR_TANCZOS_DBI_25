@@ -6,6 +6,7 @@ import spengergasse.at.sj2425scherzerrabar.domain.EmailAddress;
 import spengergasse.at.sj2425scherzerrabar.domain.Person;
 import spengergasse.at.sj2425scherzerrabar.foundation.ApiKeyFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,7 +22,8 @@ public class Author extends Person {
     @Embedded
     @AttributeOverride(name = "apiKey", column = @Column(name = "author_api_key"))
     private ApiKey authorApiKey;
-
+    @ManyToMany(mappedBy = "authors")
+    private List<Book> books = new ArrayList<>();
 
 
     public Author(String firstName, String lastName, List<Address> address, EmailAddress emailAddress, String penname) {
@@ -57,5 +59,13 @@ public class Author extends Person {
 
     public void setAddress(List<Address> address) {
         this.address = address;
+    }
+    // --- NEU: Getter und Setter ---
+    public List<Book> getBooks() {
+        return books;
+    }
+
+    public void setBooks(List<Book> books) {
+        this.books = books;
     }
 }
